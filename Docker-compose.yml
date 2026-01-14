@@ -1,0 +1,35 @@
+services:
+  #----------------------------------------------------------------------------#
+  #                                    CLIENT                                  #
+  #----------------------------------------------------------------------------#
+  client:
+    ports:
+      - 8080:8080
+    container_name: client
+    image: client
+    build:
+      context: services/client/
+    volumes:
+      - client_volume:/var/npm-project
+      - node_modules:/var/npm-project/node_modules
+    restart: "always"
+
+  #----------------------------------------------------------------------------#
+  #                                    VOLUMES                                 #
+  #----------------------------------------------------------------------------#
+
+volumes:
+  client_volume:
+    name: client_volume
+    driver: local
+    driver_opts:
+      device: ./services/client/npm-project
+      o: bind
+      type: none
+  volumes:
+    node_modules:
+
+networks:
+  rooms:
+    name: rooms
+    driver: bridge
