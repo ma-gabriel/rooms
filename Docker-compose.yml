@@ -26,8 +26,7 @@ volumes:
       device: ./services/client/npm-project
       o: bind
       type: none
-  volumes:
-    node_modules:
+  node_modules:
 
 networks:
   rooms:
