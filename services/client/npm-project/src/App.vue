@@ -27,7 +27,7 @@ function addDraggable(id: number | undefined, type: string) {
   if (typeof id !== "number") {
     const maxId = items.value.length && Math.max(...items.value.map(item => item.id));
     id = maxId + 1;
-    localStorage.setItem(`draggable${type}:${id}`, "{\"x\":50, \"y\":35}")
+    localStorage.setItem(`draggable${type}:${id}`, "{\"x\":30, \"y\":30}")
   }
   items.value.push({ id: id, type: type });
 }

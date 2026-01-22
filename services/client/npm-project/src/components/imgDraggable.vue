@@ -38,8 +38,8 @@
           type="number"
           inputmode="numeric"
           min="3"
-          max="100"
-          @input="(e: InputEvent) => (e.target as HTMLInputElement).value = String(size = Math.min(Math.max(parseInt((e.target as HTMLInputElement).value) || 0, 0), 100))"
+          max="110"
+          @input="(e: InputEvent) => (e.target as HTMLInputElement).value = String(size = Math.min(Math.max(parseInt((e.target as HTMLInputElement).value) || 0, 0), 110))"
           :value="size"
           /> %
       </label>

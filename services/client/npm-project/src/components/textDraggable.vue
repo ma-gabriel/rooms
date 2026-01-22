@@ -1,7 +1,7 @@
 <template>
   <div
     class="draggable"
-    :style="{ top: y + '%', left: x + '%', 'z-index': z, color: color, 'font-size': size + 'px', transform: 'rotate(' + r + 'deg)' }"
+    :style="{ top: y - size / 5 + '%', left: x - size / 5 + '%', 'z-index': z, color: color, 'font-size': size * 10 + '%', transform: 'rotate(' + r + 'deg)' }"
     @mousedown="startDrag"
     @contextmenu="openMenu"
   >
