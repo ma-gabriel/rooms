@@ -1,12 +1,12 @@
 <template>
-  <div
+  <img
     class="draggable"
-    :style="{ top: y + '%', left: x + '%', 'z-index': z, color: color, 'font-size': size + 'px', transform: 'rotate(' + r + 'deg)' }"
+    :style="{ top: y - size / 2 + '%', left: x - size / 2 + '%', 'z-index': z, width: size + '%', transform: 'rotate(' + r + 'deg)' }"
     @mousedown="startDrag"
     @contextmenu="openMenu"
-  >
-    {{ text }}
-  </div>
+    draggable="false"
+    :src="link || 'https://pc.net/img/terms/right-click.svg'"
+  />
   <teleport to="body">
     <div
         type="menu"
@@ -17,8 +17,9 @@
         @contextmenu.stop.prevent
     >
       <input
-      @input="(e: InputEvent) => (text = (e.target as HTMLInputElement).value)"
-      :value="text"
+      @input="(e: InputEvent) => (link = (e.target as HTMLInputElement).value)"
+      :value="link"
+      placeholder="link"
       />
       <label>layer:
         <input
@@ -31,22 +32,16 @@
           :value="z"
           />
       </label>
-      <label>size:
+
+      <label>width:
         <input
           type="number"
           inputmode="numeric"
-          min="8"
-          max="160"
-          @input="(e: InputEvent) => (e.target as HTMLInputElement).value = String(size = Math.min(Math.max(parseInt((e.target as HTMLInputElement).value) || 0, 0), 160))"
+          min="3"
+          max="100"
+          @input="(e: InputEvent) => (e.target as HTMLInputElement).value = String(size = Math.min(Math.max(parseInt((e.target as HTMLInputElement).value) || 0, 0), 100))"
           :value="size"
-          />
-      </label>
-      <label> text color:
-        <input
-          type="color"
-          @input="(e: InputEvent) => (color = (e?.target as HTMLInputElement).value)"
-          :value="color"
-          />
+          /> %
       </label>
       <label>rotation:
         <input
@@ -75,30 +70,28 @@ import { ref, onMounted, onBeforeUnmount, watch, reactive } from "vue";
 const props = defineProps<{ id: number }>();
 
 const x = ref(100);
-const z = ref(15);
+const z = ref(5);
 const y = ref(100);
 const r = ref(0);
-const size = ref(16);
-const color = ref("#FFFFFFFF");
-const text = ref("right click");
+const size = ref(20);
+const link = ref("");
 
 onMounted(() => {
-  const saved = localStorage.getItem(`draggableText:${props.id}`);
+  const saved = localStorage.getItem(`draggableImg:${props.id}`);
   if (!saved) {
     saveSelf();
     return;
   }
-  const { x: sx, y: sy, z: sz, r: sr, text: stext, color: scolor, size: ssize} = JSON.parse(saved);
-  if (sx) x.value = sx;
-  if (sy) y.value = sy;
-  if (sr) r.value = sr;
-  if (sz) z.value = sz;
-  if (ssize) size.value = ssize;
-  if (stext) text.value = stext;
-  if (scolor) color.value = scolor;
+  const { x: sx, y: sy, z: sz, r: sr, link: slink, size: ssize} = JSON.parse(saved);
+  if (sx !== undefined) x.value = sx;
+  if (sy !== undefined) y.value = sy;
+  if (sz !== undefined) z.value = sz;
+  if (sr !== undefined) r.value = sr;
+  if (ssize !== undefined) size.value = ssize;
+  if (slink !== undefined) link.value = slink;
 });
 
-watch([x, y, z, r, text, color, size], () => saveSelf());
+watch([x, y, z, r, link, size], () => saveSelf());
 
 let dragging = false;
 let offsetX = 0;
@@ -106,8 +99,8 @@ let offsetY = 0;
 
 function saveSelf() {
   localStorage.setItem(
-    `draggableText:${props.id}`,
-    JSON.stringify({ x: x.value, y: y.value, z: z.value, r: r.value, text: text.value, color: color.value, size: size.value})
+    `draggableImg:${props.id}`,
+    JSON.stringify({ x: x.value, y: y.value, z: z.value, r: r.value, link: link.value, size: size.value })
   );
 }
 
@@ -140,6 +133,10 @@ const menu = reactive({
   y: 0,
 });
 
+const emit = defineEmits<{
+  (e: 'erase', id: number): void
+}>()
+
 watch(menu, (menu) => {
   if (menu.visible) {
     document.addEventListener('mousedown', closeMenu, {once: true})
@@ -148,10 +145,6 @@ watch(menu, (menu) => {
   }
 })
 
-const emit = defineEmits<{
-  (e: 'erase', id: number): void
-}>()
-
 function openMenu(e: MouseEvent) {
   menu.x = e.clientX;
   menu.y = e.clientY;
@@ -159,7 +152,7 @@ function openMenu(e: MouseEvent) {
 }
 
 function closeMenu() {
-  if (size.value < 8) size.value = 8
+  if (size.value < 3) size.value = 3;
   menu.visible = false;
 }
 
