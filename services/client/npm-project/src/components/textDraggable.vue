@@ -1,7 +1,7 @@
 <template>
   <div
     class="draggable"
-    :style="{ top: y - size / 5 + '%', left: x - size / 5 + '%', 'z-index': z, color: color, 'font-size': size * 10 + '%', transform: 'rotate(' + r + 'deg)' }"
+    :style="{ top: y - size / 5 + '%', left: x + '%', 'z-index': z, color: color, 'font-size': size * 10 + '%', transform: 'rotate(' + r + 'deg)' }"
     @mousedown="startDrag"
     @contextmenu="openMenu"
   >
@@ -181,6 +181,7 @@ onBeforeUnmount(() => {
   user-select: none;
   border-radius: 6px;
   font-weight: bold;
+  white-space: nowrap;
 }
 .closing {
   border-radius: 0%;
