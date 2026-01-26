@@ -1,0 +1,14 @@
+{
+  "name": "rooms",
+  "dockerComposeFile": "../Docker-compose.yml",
+  "service": "client",
+  "workspaceFolder": "/var/npm-project",
+  "shutdownAction": "none",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "Vue.volar"
+      ]
+    }
+  }
+}
