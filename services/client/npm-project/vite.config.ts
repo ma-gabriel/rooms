@@ -8,5 +8,9 @@ export default defineConfig({
     port: 8080,
     strictPort: true
   },
+  build: {
+    outDir: "/var/www",
+    emptyOutDir: true
+  },
   plugins: [vue()],
 })

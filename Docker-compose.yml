@@ -3,15 +3,30 @@ services:
   #                                    CLIENT                                  #
   #----------------------------------------------------------------------------#
   client:
-    ports:
-      - 8080:8080
     container_name: client
     image: client
     build:
       context: services/client/
     volumes:
       - client_volume:/var/npm-project
-      - node_modules:/var/npm-project/node_modules
+      - node_modules_client:/var/npm-project/node_modules
+      - www:/var/www
+    restart: "always"
+  
+  #----------------------------------------------------------------------------#
+  #                                    SERVER                                  #
+  #----------------------------------------------------------------------------#
+  server:
+    container_name: server
+    image: server
+    build:
+      context: services/server/
+    ports:
+      - 8080:8080
+    volumes:
+      - server_volume:/var/npm-project
+      - node_modules_server:/var/npm-project/node_modules
+      - www:/var/www
     restart: "always"
 
   #----------------------------------------------------------------------------#
@@ -26,7 +41,22 @@ volumes:
       device: ./services/client/npm-project
       o: bind
       type: none
-  node_modules:
+  server_volume:
+    name: server_volume
+    driver: local
+    driver_opts:
+      device: ./services/server/npm-project
+      o: bind
+      type: none
+  www:
+    name: www
+    driver: local
+    driver_opts:
+      device: ./built_data/www
+      o: bind
+      type: none
+  node_modules_client:
+  node_modules_server:
 
 networks:
   rooms:
