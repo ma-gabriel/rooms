@@ -1,10 +1,14 @@
 import fastifyModule from "fastify";
+import fastifyStatic from "@fastify/static"
+
 
 const fastify = fastifyModule();
-fastify.get('/', (req, reply) => {
-    return reply.send("hello world from geymat");
-});
 
-fastify.listen({ port: 8080, host: "0.0.0.0" }, (err, address) => {
+fastify.register(fastifyStatic, {
+  root: "/var/www",
+  prefix: "/"
+})
+
+fastify.listen({ port: 3000, host: "0.0.0.0" }, (err, address) => {
   if (err) throw err;
 });

@@ -26,7 +26,7 @@ services:
       - node_modules_server:/var/npm-project/node_modules
       - www:/var/www
     networks:
-      - trancendence
+      - rooms
     restart: "always"
 
   #----------------------------------------------------------------------------#
@@ -38,9 +38,9 @@ services:
     build:
       context: services/nginx/
     ports:
-      - 8080:8080
+      - 8080:80
     networks:
-      - trancendence
+      - rooms
     restart: "always"
   #----------------------------------------------------------------------------#
   #                                    VOLUMES                                 #
