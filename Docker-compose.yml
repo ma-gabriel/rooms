@@ -1,6 +1,6 @@
 services:
   #----------------------------------------------------------------------------#
-  #                                    CLIENT                                  #
+  #                                 CLIENT                                     #
   #----------------------------------------------------------------------------#
   client:
     container_name: client
@@ -14,21 +14,34 @@ services:
     restart: "always"
   
   #----------------------------------------------------------------------------#
-  #                                    SERVER                                  #
+  #                                  SERVER                                    #
   #----------------------------------------------------------------------------#
   server:
     container_name: server
     image: server
     build:
       context: services/server/
-    ports:
-      - 8080:8080
     volumes:
       - server_volume:/var/npm-project
       - node_modules_server:/var/npm-project/node_modules
       - www:/var/www
+    networks:
+      - trancendence
     restart: "always"
 
+  #----------------------------------------------------------------------------#
+  #                                   NGINX                                    #
+  #----------------------------------------------------------------------------#
+  nginx:
+    container_name: nginx
+    image: nginx
+    build:
+      context: services/nginx/
+    ports:
+      - 8080:8080
+    networks:
+      - trancendence
+    restart: "always"
   #----------------------------------------------------------------------------#
   #                                    VOLUMES                                 #
   #----------------------------------------------------------------------------#
