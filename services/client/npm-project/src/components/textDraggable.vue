@@ -1,7 +1,7 @@
 <template>
   <div
     class="draggable"
-    :style="{ top: y - size / 5 + '%', left: x + '%', 'z-index': z, color: color, 'font-size': size * 10 + '%', transform: 'rotate(' + r + 'deg)' }"
+    :style="{ top: y + '%', left: x + '%', 'z-index': z, color: color, 'font-size': size / 10 + 'vw', transform: 'rotate(' + r + 'deg)' }"
     @mousedown="startDrag"
     @contextmenu="openMenu"
   >
@@ -36,8 +36,8 @@
           type="number"
           inputmode="numeric"
           min="8"
-          max="160"
-          @input="(e: InputEvent) => (e.target as HTMLInputElement).value = String(size = Math.min(Math.max(parseInt((e.target as HTMLInputElement).value) || 0, 0), 160))"
+          max="200"
+          @input="(e: InputEvent) => (e.target as HTMLInputElement).value = String(size = Math.min(Math.max(parseInt((e.target as HTMLInputElement).value) || 0, 0), 200))"
           :value="size"
           />
       </label>
