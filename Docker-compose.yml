@@ -43,21 +43,22 @@ services:
       - rooms
     restart: "always"
 
-  # #----------------------------------------------------------------------------#
-  # #                                   DB                                       #
-  # #----------------------------------------------------------------------------#
-  # db:
-  #   image: postgres:16-alpine
-  #   environment:
-  #     - POSTGRES_USER=postgres_user
-  #     - POSTGRES_PASSWORD=password
-  #     - POSTGRES_DB=catalog_db
-  #   volumes:
-  #     - db_data:/var/lib/postgresql/data
-  #     - node_modules_database:/var/npm-project/node_modules
-  #     - ./postgresql/init_shadow_db.sql:/docker-entrypoint-initdb.d/init_shadow_db.sql
-  #   networks:
-  #     - rooms
+  #----------------------------------------------------------------------------#
+  #                                   DB                                       #
+  #----------------------------------------------------------------------------#
+
+  postgres:
+    image: postgres:16
+    container_name: postgres_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: rooms_user
+      POSTGRES_PASSWORD: rooms_password
+      POSTGRES_DB: rooms_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - rooms
   
   #----------------------------------------------------------------------------#
   #                                    VOLUMES                                 #
@@ -78,13 +79,7 @@ volumes:
       device: ./services/server/npm-project
       o: bind
       type: none
-  # databse_volume:
-  #   name: database_volume
-  #   driver: local
-  #   driver_opts:
-  #     device: ./services/database/npm-project
-  #     o: bind
-  #     type: none
+  postgres_data:
   www:
     name: www
     driver: local
@@ -92,15 +87,7 @@ volumes:
       device: ./built_data/www
       o: bind
       type: none
-  # db_data:
-  #   name: db
-  #   driver: local
-  #   driver_opts:
-  #     device: ./built_data/db
-  #     o: bind
-  #     type: none
   node_modules_client:
-  # node_modules_database:
   node_modules_server:
 
 networks:
