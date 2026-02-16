@@ -1,6 +1,6 @@
 import fastifyModule from "fastify";
 
-import pageRoutes from "./routes/login_get_routes";
+import pageRoutes from "./routes/account";
 import config from "./server_config";
 import defaultPage from "./routes/default_page";
 

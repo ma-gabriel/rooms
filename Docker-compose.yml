@@ -27,6 +27,8 @@ services:
       - www:/var/www
     networks:
       - rooms
+    environment:
+      DATABASE_URL: postgresql://rooms_user:rooms_password@postgres_db:5432/rooms_db
     restart: "always"
 
   #----------------------------------------------------------------------------#

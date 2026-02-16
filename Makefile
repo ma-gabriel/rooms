@@ -30,3 +30,7 @@ rm: stop
 .PHONY: prune
 prune: stop
 	docker system prune --all --force
+
+.PHONY: db
+db:
+	 docker exec -it postgres_db psql "postgresql://rooms_user:rooms_password@localhost:5432/rooms_db"

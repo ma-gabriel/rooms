@@ -1,24 +1,19 @@
 <template>
   <div class="auth-wrapper">
-    <form class="auth-card" @submit.prevent="">
+    <form class="auth-card" @submit.prevent="register">
       <h2>Create Account</h2>
       <div class="form-group">
-        <input 
-          v-model="username" 
-          placeholder="Username" 
-          type="text" 
-          required
-        />
+        <input v-model="username" placeholder="Username" type="text" required />
         <p v-if="validation.failing === 1" class="error">
           {{ validation.reason }}
         </p>
       </div>
 
       <div class="form-group">
-        <input 
-          v-model="password" 
-          placeholder="Password" 
-          type="password" 
+        <input
+          v-model="password"
+          placeholder="Password"
+          type="password"
           required
         />
         <p v-if="validation.failing === 2" class="error">
@@ -27,10 +22,10 @@
       </div>
 
       <div class="form-group">
-        <input 
-          v-model="password_check" 
-          placeholder="Confirm Password" 
-          type="password" 
+        <input
+          v-model="password_check"
+          placeholder="Confirm Password"
+          type="password"
           required
         />
         <p v-if="validation.failing === 3" class="error">
@@ -39,7 +34,7 @@
       </div>
 
       <button type="submit" class="submit-btn">
-         {{validation.failing == 0 ? 'Sign-up' : '...' }}
+        {{ validation.failing == 0 ? "Sign-up" : "..." }}
       </button>
 
       <p class="switch-link">
@@ -50,9 +45,7 @@
   </div>
 </template>
 
-
 <script setup lang="ts">
-
 import { ref } from "vue";
 const username = ref("");
 const password = ref("");
@@ -62,20 +55,33 @@ import { computed } from "vue";
 
 const validation = computed(() => {
   if (!username.value && !password.value && !password_check.value) {
-    return { failing: -1, reason: '' }
+    return { failing: -1, reason: "" };
   }
   if (username.value.length < 3) {
-    return { failing: 1, reason: 'the username must be at least 3 chars long' }
+    return { failing: 1, reason: "the username must be at least 3 chars long" };
   }
   if (password.value.length < 4) {
-    return { failing: 2, reason: 'the password must be at least 4 chars long' }
+    return { failing: 2, reason: "the password must be at least 4 chars long" };
   }
   if (password.value !== password_check.value) {
-    return { failing: 3, reason: 'the two password must be the same' }
+    return { failing: 3, reason: "the two password must be the same" };
   }
-  return { failing: 0, reason: '' }
-})
+  return { failing: 0, reason: "" };
+});
 
+async function register() {
+  const response = await fetch("/register", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: new URLSearchParams({
+      username: username.value,
+      password: password.value,
+    }),
+  });
+  console.log(response)
+}
 </script>
 
 <style scoped>
@@ -92,7 +98,7 @@ const validation = computed(() => {
   width: 100%;
   max-width: 400px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-  background: linear-gradient(135deg, #0f971c, #0c0c0c );
+  background: linear-gradient(135deg, #0f971c, #0c0c0c);
 }
 
 .auth-card h2 {

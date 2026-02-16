@@ -12,6 +12,7 @@ dist
 dist-ssr
 *.local
 built_data
+prisma/generated/
 
 # Editor directories and files
 .vite
