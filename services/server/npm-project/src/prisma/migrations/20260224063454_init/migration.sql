@@ -3,6 +3,7 @@ CREATE TABLE "User" (
     "id" SERIAL NOT NULL,
     "username" TEXT NOT NULL,
     "password" TEXT NOT NULL,
+    "draggables" JSONB NOT NULL DEFAULT '[]'::jsonb,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );

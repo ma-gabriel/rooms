@@ -1,98 +1,166 @@
-<script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
-import TextDraggable from "../components/textDraggable.vue";
-import ImgDraggable from "../components/imgDraggable.vue";
-import EmbedDraggable from "../components/EmbedDraggable.vue";
-
-onMounted(() => {
-  document.addEventListener("contextmenu", (e) => e.preventDefault())
-});
-
-type DraggableItem = {
-  id: number;
-  type: string;
-};
-
-const items = ref<DraggableItem[]>([]);
-
-for (let i = 0; i < localStorage.length; i++){
-  if (localStorage.key(i)?.startsWith("draggable")) {
-    const id = parseInt(localStorage.key(i)?.substring((localStorage.key(i)?.indexOf(':') || 0) + 1) || "");
-    if (isFinite(id) && id >= 0)
-      addDraggable(id, localStorage.key(i)?.substring( 9, localStorage.key(i)?.indexOf(':') || 0 ) || "Text")
-  }
-}
-
-function addDraggable(id: number | undefined, type: string) {
-  if (typeof id !== "number") {
-    const maxId = items.value.length && Math.max(...items.value.map(item => item.id));
-    id = maxId + 1;
-    localStorage.setItem(`draggable${type}:${id}`, "{\"x\":30, \"y\":30}")
-  }
-  items.value.push({ id: id, type: type });
-}
-
-const textItems = computed(() =>
-  items.value.filter(item => item.type === 'Text')
-)
-
-const imageItems = computed(() =>
-  items.value.filter(item => item.type === 'Img')
-)
-const embedItems = computed(() =>
-  items.value.filter(item => item.type === 'Embed')
-)
-
-function eraseDraggable(id: number) {
-  const type = items.value.find(item => item.id === id)?.type;
-  items.value = items.value.filter(item => item.id !== id);
-  localStorage.removeItem(`draggable${type}:${id}`);
-}
-
-function clearDraggable() {
-  if (!confirm("you sure wanna reset everything ?"))
-    return;
-  items.value.forEach(element => {
-    localStorage.removeItem(`draggable${element.type}:${element.id}`);
-  });
-  items.value.length = 0;
-}
-</script>
 
 <template>
-  <button @click="addDraggable(undefined, 'Text')" class="add-btn">
+  <button @click="addDraggable({ type: 'Text', id: 0 })" class="add-btn">
     Add Text
   </button>
-  <button @click="addDraggable(undefined, 'Img')" class="add-btn" style="top: 60px;">
+  <button
+    @click="addDraggable({ type: 'Img', id: 0 })"
+    class="add-btn"
+    style="top: 60px"
+  >
     Add Image
   </button>
-  <button @click="addDraggable(undefined, 'Embed')" class="add-btn" style="top: 110px;">
+  <button
+    @click="addDraggable({ type: 'Embed', id: 0 })"
+    class="add-btn"
+    style="top: 110px"
+  >
     Add Embed (youtube for now)
   </button>
-  <button v-if="items.length > 0" @click="clearDraggable()" class="clear-btn">
+  <button @click="logOut" class="clear-btn">Log out</button>
+  <button @click="save" class="clear-btn" style="top: 60px">save</button>
+  <button
+    v-if="items.length > 0"
+    @click="clearDraggable()"
+    class="clear-btn"
+    style="top: 110px"
+  >
     Erase Everything
   </button>
 
-<TextDraggable
+  <TextDraggable
     v-for="item in textItems"
     :key="item.id"
-    :id="item.id"
+    :draggable="item"
     @erase="eraseDraggable"
+    @update="updateDraggable"
   />
-  <!-- Image items -->
   <ImgDraggable
     v-for="item in imageItems"
     :key="item.id"
-    :id="item.id"
+    :draggable="item"
     @erase="eraseDraggable"
+    @update="updateDraggable"
   />
   <EmbedDraggable
     v-for="item in embedItems"
     :key="item.id"
-    :id="item.id"
+    :draggable="item"
     @erase="eraseDraggable"
+    @update="updateDraggable"
   />
 </template>
+
+<script setup lang="ts">
+import { computed, onBeforeUnmount, onMounted, ref } from "vue";
+import TextDraggable from "../components/textDraggable.vue";
+import ImgDraggable from "../components/imgDraggable.vue";
+import EmbedDraggable from "../components/EmbedDraggable.vue";
+import { authFetch, useAuthStore } from "../stores/auth";
+import router from "../router";
+
+export type DraggableItem = {
+  id: number;
+  type: "Text" | "Img" | "Embed";
+
+  // common
+  z?: number;
+  x?: number;
+  y?: number;
+  size?: number;
+  r?: number;
+
+  //text
+  color?: string;
+  text?: string;
+
+  //img
+  link?: string;
+
+  //embed
+  videoId?: string;
+};
+const items = ref<DraggableItem[]>([]);
+
+const auth = useAuthStore();
+
+onMounted(() => {
+  document.addEventListener("contextmenu", prevent);
+  getItems();
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener("contextmenu", prevent);
+});
+
+function prevent(e: Event) {
+  e.preventDefault();
+}
+
+async function getItems() {
+  try {
+    const res = await authFetch("/api/rooms");
+    const body = await res.json();
+    if (!body.success) return;
+    for (let i = 0; i < body.data.draggables.length; i++) {
+      addDraggable(body.data.draggables[i]);
+    }
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+function addDraggable(next: DraggableItem) {
+  const copy = {...next};
+  const maxId =
+  items.value.length && Math.max(...items.value.map((item) => item.id));
+  copy.id = maxId + 1;
+  items.value.push(copy);
+}
+
+const textItems = computed(() =>
+  items.value.filter((item) => item.type === "Text"),
+);
+
+const imageItems = computed(() =>
+  items.value.filter((item) => item.type === "Img"),
+);
+const embedItems = computed(() =>
+  items.value.filter((item) => item.type === "Embed"),
+);
+
+function updateDraggable(updated: DraggableItem) {
+  const searched = items.value.find(item => item.id === updated.id);
+  if (!searched) return;
+  Object.assign(searched, updated);
+}
+
+function eraseDraggable(id: number) {
+  items.value = items.value.filter((item) => item.id !== id);
+}
+
+function clearDraggable() {
+  if (!confirm("you sure wanna reset everything ?")) return;
+  items.value.length = 0;
+}
+
+function save() {
+  authFetch("/api/rooms", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      draggables: items.value,
+    }),
+  });
+}
+
+function logOut() {
+  auth.logout();
+  router.push("/login");
+}
+</script>
 
 <style scoped>
 .add-btn {

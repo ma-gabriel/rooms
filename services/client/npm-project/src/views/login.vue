@@ -1,24 +1,19 @@
 <template>
   <div class="auth-wrapper">
-    <form class="auth-card" @submit.prevent="">
+    <form class="auth-card" @submit.prevent="logIn">
       <h2>Connection</h2>
       <div class="form-group">
-        <input 
-          v-model="username" 
-          placeholder="Username" 
-          type="text" 
-          required
-        />
+        <input v-model="username" placeholder="Username" type="text" required />
         <p v-if="validation.failing === 1" class="error">
           {{ validation.reason }}
         </p>
       </div>
 
       <div class="form-group">
-        <input 
-          v-model="password" 
-          placeholder="Password" 
-          type="password" 
+        <input
+          v-model="password"
+          placeholder="Password"
+          type="password"
           required
         />
         <p v-if="validation.failing === 2" class="error">
@@ -27,8 +22,15 @@
       </div>
 
       <button type="submit" class="submit-btn">
-         {{validation.failing == 0 ? 'Log in' : '...' }}
+        {{ validation.failing === 0 ? "Log in" : "..." }}
       </button>
+      <p
+        v-if="serverAnswer"
+        class="error"
+        style="background-color: #00000000; font-size: 1rem"
+      >
+        {{ serverAnswer }}
+      </p>
 
       <p class="switch-link">
         Already have an account?
@@ -38,29 +40,61 @@
   </div>
 </template>
 
-
 <script setup lang="ts">
+import { ref, computed, watch } from "vue";
+import { useRouter } from "vue-router";
+import { useAuthStore } from "../stores/auth";
+const auth = useAuthStore();
 
-import { ref } from "vue";
+const router = useRouter();
 const username = ref("");
 const password = ref("");
-const password_check = ref("");
-
-import { computed } from "vue";
+const canSubmit = ref(false);
+const serverAnswer = ref("");
 
 const validation = computed(() => {
-  if (!username.value && !password.value && !password_check.value) {
-    return { failing: -1, reason: '' }
+  if (canSubmit.value === false) {
+    return { failing: -1, reason: "" };
   }
   if (username.value.length < 3) {
-    return { failing: 1, reason: 'the username must be at least 3 chars long' }
+    return { failing: 1, reason: "the username must be at least 3 chars long" };
   }
   if (password.value.length < 4) {
-    return { failing: 2, reason: 'the password must be at least 4 chars long' }
+    return { failing: 2, reason: "the password must be at least 4 chars long" };
   }
-  return { failing: 0, reason: '' }
-})
+  return { failing: 0, reason: "" };
+});
 
+watch([username, password], () => {
+  canSubmit.value = true;
+  serverAnswer.value = "";
+});
+
+async function logIn() {
+  if (validation.value.failing) return;
+  canSubmit.value = false;
+  try {
+    const res = await fetch("/api/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({
+        username: username.value,
+        password: password.value,
+      }),
+    });
+    const body = await res.json();
+    if (!body.success) {
+      serverAnswer.value = body.reason;
+      return;
+    }
+    auth.login(body.data.username);
+    await router.push("/");
+  } catch (err) {
+    console.error(err);
+  }
+}
 </script>
 
 <style scoped>
@@ -77,7 +111,7 @@ const validation = computed(() => {
   width: 100%;
   max-width: 400px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-  background: linear-gradient(135deg, #0f971c, #0c0c0c );
+  background: linear-gradient(135deg, #0f971c, #0c0c0c);
 }
 
 .auth-card h2 {

@@ -56,7 +56,7 @@
       </label>
       <button
         class="closing"
-        @click="$emit('erase', props.id)"
+        @click="$emit('erase', id)"
         style="background-color: #903030;"
         >del
       </button>
@@ -66,29 +66,25 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, watch, reactive } from "vue";
+import type { DraggableItem } from "../views/basic.vue";
 
-const props = defineProps<{ id: number }>();
+const props = defineProps<{ draggable: DraggableItem }>();
+const id = props.draggable.id;
 
-const x = ref(100);
+const x = ref(30);
 const z = ref(5);
-const y = ref(100);
+const y = ref(30);
 const r = ref(0);
 const size = ref(20);
 const link = ref("");
 
 onMounted(() => {
-  const saved = localStorage.getItem(`draggableImg:${props.id}`);
-  if (!saved) {
-    saveSelf();
-    return;
-  }
-  const { x: sx, y: sy, z: sz, r: sr, link: slink, size: ssize} = JSON.parse(saved);
-  if (sx !== undefined) x.value = sx;
-  if (sy !== undefined) y.value = sy;
-  if (sz !== undefined) z.value = sz;
-  if (sr !== undefined) r.value = sr;
-  if (ssize !== undefined) size.value = ssize;
-  if (slink !== undefined) link.value = slink;
+  if (props.draggable.x) x.value = props.draggable.x;
+  if (props.draggable.y) y.value = props.draggable.y;
+  if (props.draggable.r) r.value = props.draggable.r;
+  if (props.draggable.z) z.value = props.draggable.z;
+  if (props.draggable.size) size.value = props.draggable.size;
+  if (props.draggable.link) link.value = props.draggable.link;
 });
 
 watch([x, y, z, r, link, size], () => saveSelf());
@@ -98,10 +94,15 @@ let offsetX = 0;
 let offsetY = 0;
 
 function saveSelf() {
-  localStorage.setItem(
-    `draggableImg:${props.id}`,
-    JSON.stringify({ x: x.value, y: y.value, z: z.value, r: r.value, link: link.value, size: size.value })
-  );
+  emit("update", {
+    id: id,
+    type: "Img",
+    x: x.value,
+    y: y.value,
+    r: r.value,
+    link: link.value,
+    size: size.value,
+  });
 }
 
 function startDrag(event: MouseEvent) {
@@ -134,8 +135,9 @@ const menu = reactive({
 });
 
 const emit = defineEmits<{
-  (e: 'erase', id: number): void
-}>()
+  (e: "erase", id: number): void;
+  (e: "update", updated: DraggableItem): void;
+}>();
 
 watch(menu, (menu) => {
   if (menu.visible) {

@@ -1,36 +1,17 @@
 import { FastifyInstance } from "fastify";
-import fastifyFormbody from "@fastify/formbody";
 
-import { PrismaClient } from "../../prisma/generated/client";
-import { PrismaPg } from "@prisma/adapter-pg";
+import registerRoute from "./account_routes/register_route";
+import logInRoute from "./account_routes/login_route";
+import infoRoute from "./account_routes/info_route";
+import logOutRoute from "./account_routes/log_out_route";
+import roomsGetRoute from "./account_routes/rooms_get_route";
+import roomsSetRoute from "./account_routes/rooms_set_route";
 
-
-const adapter = new PrismaPg({
-  connectionString: process.env.DATABASE_URL!,
-});
-
-const prisma = new PrismaClient({ adapter });
-
-export default async function pageRoutes(fastifyInstance: FastifyInstance) {
-  fastifyInstance.register(fastifyFormbody);
-
-  fastifyInstance.get("/hello", (req, reply) => reply.send("World"));
-
-  fastifyInstance.post<{ Body: { username: string; password: string } }>(
-    "/register",
-    async (req, reply) => {
-      const { username, password } = req.body;
-      try {
-        const newUser = await prisma.user.create({
-          data: {
-            username: username,
-            password: password,
-          },
-        });
-        reply.send({ success: true, userId: newUser.id });
-      } catch (error) {
-        reply.status(500).send({ error: "Failed to create user" });
-      }
-    },
-  );
+export default async function accountRoutes(fastifyInstance: FastifyInstance) {
+  fastifyInstance.register(registerRoute);
+  fastifyInstance.register(logInRoute);
+  fastifyInstance.register(infoRoute);
+  fastifyInstance.register(logOutRoute);
+  fastifyInstance.register(roomsGetRoute);
+  fastifyInstance.register(roomsSetRoute);
 }

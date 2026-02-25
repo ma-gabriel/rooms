@@ -23,7 +23,7 @@
 
       <div class="form-group">
         <input
-          v-model="password_check"
+          v-model="passwordCheck"
           placeholder="Confirm Password"
           type="password"
           required
@@ -36,6 +36,13 @@
       <button type="submit" class="submit-btn">
         {{ validation.failing == 0 ? "Sign-up" : "..." }}
       </button>
+      <p
+        v-if="serverAnswer"
+        class="error"
+        style="background-color: #00000000; font-size: 1rem"
+      >
+        {{ serverAnswer }}
+      </p>
 
       <p class="switch-link">
         Already have an account?
@@ -46,15 +53,20 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed, watch } from "vue";
+import { useRouter } from "vue-router";
+import { useAuthStore } from "../stores/auth";
+const auth = useAuthStore();
+
+const router = useRouter();
 const username = ref("");
 const password = ref("");
-const password_check = ref("");
-
-import { computed } from "vue";
+const passwordCheck = ref("");
+const canSubmit = ref(false);
+const serverAnswer = ref("");
 
 const validation = computed(() => {
-  if (!username.value && !password.value && !password_check.value) {
+  if (canSubmit.value === false) {
     return { failing: -1, reason: "" };
   }
   if (username.value.length < 3) {
@@ -63,24 +75,41 @@ const validation = computed(() => {
   if (password.value.length < 4) {
     return { failing: 2, reason: "the password must be at least 4 chars long" };
   }
-  if (password.value !== password_check.value) {
+  if (password.value !== passwordCheck.value) {
     return { failing: 3, reason: "the two password must be the same" };
   }
   return { failing: 0, reason: "" };
 });
 
+watch([username, password, passwordCheck], () => {
+  canSubmit.value = true;
+  serverAnswer.value = "";
+});
+
 async function register() {
-  const response = await fetch("/register", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: new URLSearchParams({
-      username: username.value,
-      password: password.value,
-    }),
-  });
-  console.log(response)
+  if (validation.value.failing) return;
+  canSubmit.value = false;
+  try {
+    const res = await fetch("/api/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({
+        username: username.value,
+        password: password.value,
+      }),
+    });
+    const body = await res.json();
+    if (!body.success) {
+      serverAnswer.value = body.reason;
+      return;
+    }
+    auth.login(body.data.username);
+    await router.push("/");
+  } catch (err) {
+    console.error(err);
+  }
 }
 </script>
 

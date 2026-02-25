@@ -1,6 +1,6 @@
 import fastifyModule from "fastify";
 
-import pageRoutes from "./routes/account";
+import accountRoutes from "./routes/account";
 import config from "./server_config";
 import defaultPage from "./routes/default_page";
 
@@ -11,7 +11,7 @@ export default function () {
   config(fastify);
 
   fastify.register(defaultPage);
-  fastify.register(pageRoutes);
+  fastify.register(accountRoutes, { prefix: "/api" });
 
   fastify.listen({ port: 3000, host: "0.0.0.0" }, (err, address) => {
     if (err) throw err;

@@ -27,7 +27,7 @@
     </svg>
     <iframe
       style="width: 100%; height: 100%;"
-      :src="'https://www.youtube.com/embed/' + (id || 'liJVSwOiiwg')"
+      :src="'https://www.youtube.com/embed/' + (videoId || 'liJVSwOiiwg') + '?autoplay=1'"
       title="YouTube video player"
       frameborder="0"
       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -45,8 +45,8 @@
         @contextmenu.stop.prevent
     >
       <input
-      @input="(e: InputEvent) => (id = (e.target as HTMLInputElement).value)"
-      :value="id"
+      @input="(e: InputEvent) => (videoId = (e.target as HTMLInputElement).value)"
+      :value="videoId"
       placeholder="video id (watch?v=[ID HERE])"
       />
       <label>layer:
@@ -83,7 +83,7 @@
       </label>
       <button
         class="closing"
-        @click="$emit('erase', props.id)"
+        @click="$emit('erase', id)"
         style="background-color: #903030;"
         >del
       </button>
@@ -93,42 +93,43 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, watch, reactive } from "vue";
+import type { DraggableItem } from "../views/basic.vue";
 
-const props = defineProps<{ id: number }>();
+const props = defineProps<{ draggable: DraggableItem }>();
+const id = props.draggable.id;
 
-const x = ref(100);
+const x = ref(30);
 const z = ref(10);
-const y = ref(100);
+const y = ref(30);
 const r = ref(0);
 const size = ref(20);
-const id = ref("liJVSwOiiwg");
+const videoId = ref("liJVSwOiiwg");
 
 onMounted(() => {
-  const saved = localStorage.getItem(`draggableEmbed:${props.id}`);
-  if (!saved) {
-    saveSelf();
-    return;
-  }
-  const { x: sx, y: sy, z: sz, r: sr, id: sid, size: ssize} = JSON.parse(saved);
-  if (sx !== undefined) x.value = sx;
-  if (sy !== undefined) y.value = sy;
-  if (sz !== undefined) z.value = sz;
-  if (sr !== undefined) r.value = sr;
-  if (ssize !== undefined) size.value = ssize;
-  if (sid !== undefined) id.value = sid;
+  if (props.draggable.x) x.value = props.draggable.x;
+  if (props.draggable.y) y.value = props.draggable.y;
+  if (props.draggable.r) r.value = props.draggable.r;
+  if (props.draggable.z) z.value = props.draggable.z;
+  if (props.draggable.size) size.value = props.draggable.size;
+  if (props.draggable.videoId) videoId.value = props.draggable.videoId;
 });
 
-watch([x, y, z, r, id, size], () => saveSelf());
+watch([x, y, z, r, videoId, size], () => saveSelf());
 
 let dragging = false;
 let offsetX = 0;
 let offsetY = 0;
 
 function saveSelf() {
-  localStorage.setItem(
-    `draggableEmbed:${props.id}`,
-    JSON.stringify({ x: x.value, y: y.value, z: z.value, r: r.value, id: id.value, size: size.value})
-  );
+  emit("update", {
+    id: id,
+    type: "Embed",
+    x: x.value,
+    y: y.value,
+    r: r.value,
+    videoId: videoId.value,
+    size: size.value,
+  });
 }
 
 function startDrag(event: MouseEvent) {
@@ -169,8 +170,9 @@ watch(menu, (menu) => {
 })
 
 const emit = defineEmits<{
-  (e: 'erase', id: number): void
-}>()
+  (e: "erase", id: number): void;
+  (e: "update", params: DraggableItem): void;
+}>();
 
 function openMenu(e: MouseEvent) {
   menu.x = e.clientX;
