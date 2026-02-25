@@ -2,9 +2,8 @@
   "name": "server",
   "private": true,
   "scripts": {
-    "prisma-gen": "npx prisma generate",
-    "dev": "npm run prisma-gen && nodemon --watch \"src/**\" --exec tsx src/main.ts",
-    "prod": "tsx src/main.ts"
+    "dev": "prisma migrate deploy && nodemon --watch \"src/**\" --exec tsx src/main.ts",
+    "prod": "prisma migrate deploy && tsx src/main.ts"
   },
   "type": "module",
   "dependencies": {
