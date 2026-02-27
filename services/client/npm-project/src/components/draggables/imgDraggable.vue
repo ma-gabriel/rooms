@@ -1,6 +1,7 @@
 <template>
   <img
     class="draggable"
+    :class="{ editable: edit }"
     :style="{
       top: y - size / 2 + '%',
       left: x - size / 2 + '%',
@@ -8,7 +9,7 @@
       width: size + '%',
       transform: 'rotate(' + r + 'deg)',
     }"
-    @mousedown="startDrag"
+    @mousedown="edit && startDrag($event)"
     @contextmenu="openMenu"
     draggable="false"
     :src="link || 'https://pc.net/img/terms/right-click.svg'"
@@ -213,13 +214,15 @@ onBeforeUnmount(() => {
   position: absolute;
   width: fit-content;
   height: fit-content;
-  cursor: move;
   display: flex;
   align-items: center;
   justify-content: center;
   user-select: none;
   border-radius: 6px;
   font-weight: bold;
+}
+.editable {
+  cursor: move;
 }
 .closing {
   border-radius: 0%;

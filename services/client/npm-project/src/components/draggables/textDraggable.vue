@@ -1,6 +1,7 @@
 <template>
   <div
     class="draggable"
+    :class="{ editable: edit }"
     :style="{
       top: y + '%',
       left: x + '%',
@@ -9,7 +10,7 @@
       'font-size': size / 10 + 'vw',
       transform: 'rotate(' + r + 'deg)',
     }"
-    @mousedown="startDrag"
+    @mousedown="edit && startDrag($event)"
     @contextmenu="openMenu"
   >
     {{ text || "right click" }}
@@ -122,7 +123,7 @@
 import { ref, onMounted, onBeforeUnmount, watch, reactive } from "vue";
 import type { DraggableItem } from "../../views/room_edit.vue";
 
-const props = defineProps<{ draggable: DraggableItem, edit: boolean }>();
+const props = defineProps<{ draggable: DraggableItem; edit: boolean }>();
 const id = props.draggable.id;
 const x = ref(30);
 const z = ref(15);
@@ -223,7 +224,6 @@ onBeforeUnmount(() => {
   position: absolute;
   width: fit-content;
   height: fit-content;
-  cursor: move;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -231,6 +231,9 @@ onBeforeUnmount(() => {
   border-radius: 6px;
   font-weight: bold;
   white-space: nowrap;
+}
+.editable {
+  cursor: move;
 }
 .closing {
   border-radius: 0%;
