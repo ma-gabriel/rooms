@@ -17,7 +17,7 @@
   <teleport to="body">
     <div
       type="menu"
-      v-if="menu.visible"
+      v-if="menu.visible && props.edit"
       class="context-menu"
       :style="{ top: menu.y + 'px', left: menu.x + 'px' }"
       @mousedown.stop
@@ -120,9 +120,9 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, watch, reactive } from "vue";
-import type { DraggableItem } from "../views/basic.vue";
+import type { DraggableItem } from "../../views/room_edit.vue";
 
-const props = defineProps<{ draggable: DraggableItem }>();
+const props = defineProps<{ draggable: DraggableItem, edit: boolean }>();
 const id = props.draggable.id;
 const x = ref(30);
 const z = ref(15);

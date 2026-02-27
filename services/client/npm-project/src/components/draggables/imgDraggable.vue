@@ -1,7 +1,13 @@
 <template>
   <img
     class="draggable"
-    :style="{ top: y - size / 2 + '%', left: x - size / 2 + '%', 'z-index': z, width: size + '%', transform: 'rotate(' + r + 'deg)' }"
+    :style="{
+      top: y - size / 2 + '%',
+      left: x - size / 2 + '%',
+      'z-index': z,
+      width: size + '%',
+      transform: 'rotate(' + r + 'deg)',
+    }"
     @mousedown="startDrag"
     @contextmenu="openMenu"
     draggable="false"
@@ -9,56 +15,96 @@
   />
   <teleport to="body">
     <div
-        type="menu"
-        v-if="menu.visible"
-        class="context-menu"
-        :style="{ top: menu.y + 'px', left: menu.x + 'px' }"
-        @mousedown.stop
-        @contextmenu.stop.prevent
+      type="menu"
+      v-if="menu.visible && props.edit"
+      class="context-menu"
+      :style="{ top: menu.y + 'px', left: menu.x + 'px' }"
+      @mousedown.stop
+      @contextmenu.stop.prevent
     >
       <input
-      @input="(e: InputEvent) => (link = (e.target as HTMLInputElement).value)"
-      :value="link"
-      placeholder="link"
+        @input="
+          (e: InputEvent) => (link = (e.target as HTMLInputElement).value)
+        "
+        :value="link"
+        placeholder="link"
       />
-      <label>layer:
+      <label
+        >layer:
         <input
           type="number"
           inputmode="numeric"
           min="0"
           max="1000"
           required="true"
-          @input="(e: InputEvent) => (e.target as HTMLInputElement).value = String(z = Math.min(Math.max(parseInt((e.target as HTMLInputElement).value) || 0, 0), 1000))"
+          @input="
+            (e: InputEvent) =>
+              ((e.target as HTMLInputElement).value = String(
+                (z = Math.min(
+                  Math.max(
+                    parseInt((e.target as HTMLInputElement).value) || 0,
+                    0,
+                  ),
+                  1000,
+                )),
+              ))
+          "
           :value="z"
-          />
+        />
       </label>
 
-      <label>width:
+      <label
+        >width:
         <input
           type="number"
           inputmode="numeric"
           min="3"
           max="110"
-          @input="(e: InputEvent) => (e.target as HTMLInputElement).value = String(size = Math.min(Math.max(parseInt((e.target as HTMLInputElement).value) || 0, 0), 110))"
+          @input="
+            (e: InputEvent) =>
+              ((e.target as HTMLInputElement).value = String(
+                (size = Math.min(
+                  Math.max(
+                    parseInt((e.target as HTMLInputElement).value) || 0,
+                    0,
+                  ),
+                  110,
+                )),
+              ))
+          "
           :value="size"
-          /> %
+        />
+        %
       </label>
-      <label>rotation:
+      <label
+        >rotation:
         <input
           type="number"
           inputmode="numeric"
           min="0"
           max="360"
           required="true"
-          @input="(e: InputEvent) => (e.target as HTMLInputElement).value = String(r = Math.min(Math.max(parseInt((e.target as HTMLInputElement).value) || 0, 0), 360))"
+          @input="
+            (e: InputEvent) =>
+              ((e.target as HTMLInputElement).value = String(
+                (r = Math.min(
+                  Math.max(
+                    parseInt((e.target as HTMLInputElement).value) || 0,
+                    0,
+                  ),
+                  360,
+                )),
+              ))
+          "
           :value="r"
-          />
+        />
       </label>
       <button
         class="closing"
         @click="$emit('erase', id)"
-        style="background-color: #903030;"
-        >del
+        style="background-color: #903030"
+      >
+        del
       </button>
     </div>
   </teleport>
@@ -66,9 +112,9 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, watch, reactive } from "vue";
-import type { DraggableItem } from "../views/basic.vue";
+import type { DraggableItem } from "../../views/room_edit.vue";
 
-const props = defineProps<{ draggable: DraggableItem }>();
+const props = defineProps<{ draggable: DraggableItem, edit: boolean }>();
 const id = props.draggable.id;
 
 const x = ref(30);
@@ -106,11 +152,10 @@ function saveSelf() {
 }
 
 function startDrag(event: MouseEvent) {
-  if (event.button !== 0)
-    return;
+  if (event.button !== 0) return;
   dragging = true;
-  offsetX = event.clientX - x.value / 100 * window.innerWidth;
-  offsetY = event.clientY - y.value / 100 * window.innerHeight;
+  offsetX = event.clientX - (x.value / 100) * window.innerWidth;
+  offsetY = event.clientY - (y.value / 100) * window.innerHeight;
 
   document.addEventListener("mousemove", onDrag);
   document.addEventListener("mouseup", stopDrag);
@@ -118,8 +163,8 @@ function startDrag(event: MouseEvent) {
 
 function onDrag(event: MouseEvent) {
   if (!dragging) return;
-  x.value = (event.clientX - offsetX) * 100 / window.innerWidth;
-  y.value = (event.clientY - offsetY) * 100 / window.innerHeight;
+  x.value = ((event.clientX - offsetX) * 100) / window.innerWidth;
+  y.value = ((event.clientY - offsetY) * 100) / window.innerHeight;
 }
 
 function stopDrag() {
@@ -141,11 +186,11 @@ const emit = defineEmits<{
 
 watch(menu, (menu) => {
   if (menu.visible) {
-    document.addEventListener('mousedown', closeMenu, {once: true})
+    document.addEventListener("mousedown", closeMenu, { once: true });
   } else {
-    document.removeEventListener('mousedown', closeMenu)
+    document.removeEventListener("mousedown", closeMenu);
   }
-})
+});
 
 function openMenu(e: MouseEvent) {
   menu.x = e.clientX;
@@ -161,7 +206,6 @@ function closeMenu() {
 onBeforeUnmount(() => {
   stopDrag();
 });
-
 </script>
 
 <style scoped>
@@ -188,12 +232,12 @@ onBeforeUnmount(() => {
   text-decoration: none;
   display: inline-block;
   font-size: x-small;
-  margin: 4px 4px; 
+  margin: 4px 4px;
 }
 .context-menu {
   position: fixed;
   border-radius: 8px;
-  background-color: #333;  /* darker, smoother */
+  background-color: #333; /* darker, smoother */
   border: 1px solid #555;
   color: white;
   z-index: 2147483647;
@@ -222,5 +266,4 @@ onBeforeUnmount(() => {
   background-color: #666;
   cursor: pointer;
 }
-
 </style>

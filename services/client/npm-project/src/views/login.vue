@@ -44,9 +44,10 @@
 import { ref, computed, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "../stores/auth";
-const auth = useAuthStore();
 
+const auth = useAuthStore();
 const router = useRouter();
+
 const username = ref("");
 const password = ref("");
 const canSubmit = ref(false);
@@ -90,9 +91,17 @@ async function logIn() {
       return;
     }
     auth.login(body.data.username);
-    await router.push("/");
+    await goBackOrHome("/");
   } catch (err) {
     console.error(err);
+  }
+}
+
+async function goBackOrHome(fallback = '/') {
+  if (window.history.state && window.history.state.back) {
+    router.back()
+  } else {
+    await router.push(fallback)
   }
 }
 </script>

@@ -1,12 +1,16 @@
 import { createRouter, createWebHistory } from "vue-router";
-import Basic from "./views/basic.vue";
+import RoomEdit from "./views/room_edit.vue";
 import Login from "./views/login.vue";
+import Default from "./views/default.vue";
 import Register from "./views/register.vue";
 import { useAuthStore } from "./stores/auth";
+import RoomView from "./views/room_view.vue";
 
 const routes = [
-  { path: "/:catchAll(.*)", component: Basic, meta: { requiresAuth: true } },
+  { path: "/:catchAll(.*)", component: Default, meta: { title: "home" } },
   { path: "/login", component: Login, meta: { title: "sign in" } },
+  { path: "/edit", component: RoomEdit, meta: { requiresAuth: true } },
+  { path: "/view", component: RoomView, meta: { requiresAuth: true } },
   { path: "/register", component: Register, meta: { title: "sign up" } },
 ];
 
