@@ -3,7 +3,19 @@
     <form class="auth-card" @submit.prevent="logIn">
       <h2>Connection</h2>
       <div class="form-group">
-        <input v-model="username" placeholder="Username" type="text" required />
+        <input
+          v-model="username"
+          placeholder="Username"
+          type="text"
+          required
+          @input="
+            (e: InputEvent) =>
+              (username = (
+                (e.target as HTMLInputElement).value.match(/[0-9a-zA-Z_]/g) ||
+                []
+              ).join(''))
+          "
+        />
         <p v-if="validation.failing === 1" class="error">
           {{ validation.reason }}
         </p>
@@ -42,11 +54,12 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from "vue";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "../stores/auth";
 
 const auth = useAuthStore();
 const router = useRouter();
+const route = useRoute();
 
 const username = ref("");
 const password = ref("");
@@ -78,31 +91,28 @@ async function logIn() {
     const res = await fetch("/api/login", {
       method: "POST",
       headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
+        "Content-Type": "application/json",
       },
-      body: new URLSearchParams({
+      body: JSON.stringify({
         username: username.value,
         password: password.value,
       }),
     });
     const body = await res.json();
     if (!body.success) {
-      serverAnswer.value = body.reason;
+      serverAnswer.value = body.message;
       return;
     }
     auth.login(body.data.username);
-    await goBackOrHome("/");
+    await goQueryOrHome();
   } catch (err) {
     console.error(err);
   }
 }
 
-async function goBackOrHome(fallback = '/') {
-  if (window.history.state && window.history.state.back) {
-    router.back()
-  } else {
-    await router.push(fallback)
-  }
+async function goQueryOrHome() {
+  const redirect = route.query.redirect;
+  router.replace(typeof redirect === "string" ? redirect : "/");
 }
 </script>
 

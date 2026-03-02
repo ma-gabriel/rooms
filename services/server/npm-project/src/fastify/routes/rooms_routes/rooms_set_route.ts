@@ -9,18 +9,14 @@ export default async function roomsSetRoute(fastifyInstance: FastifyInstance) {
       if (!req.body.draggables || !Array.isArray(req.body.draggables))
         return reply
           .code(400)
-          .send({ success: false, reason: "i need an array dumbass" });
+          .send({ success: false, message: "i need an array dumbass" });
       try {
         await req.jwtVerify();
-        const user = await prismaInstance.user.update({
-          where: {
-            id: req.user.id,
-          },
-          data: {
-            draggables: req.body.draggables,
-          },
+        const rooms = await prismaInstance.room.updateManyAndReturn({
+          where: { ownerId: req.user.id },
+          data: { draggables: req.body.draggables },
         });
-        if (user === null) {
+        if (rooms === null) {
           return reply
             .code(401)
             .setCookie("token", "nothing", {
@@ -36,7 +32,7 @@ export default async function roomsSetRoute(fastifyInstance: FastifyInstance) {
             });
         }
         const token = fastifyInstance.jwt.sign(
-          { id: user.id },
+          { id: req.user.id },
           { expiresIn: "15m" },
         );
         reply
@@ -49,7 +45,7 @@ export default async function roomsSetRoute(fastifyInstance: FastifyInstance) {
           })
           .send({
             success: true,
-            data: { draggables: user.draggables },
+            data: { draggables: rooms[0].draggables },
           });
       } catch (error) {
         return reply

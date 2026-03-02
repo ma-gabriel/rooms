@@ -62,6 +62,26 @@ services:
     networks:
       - rooms
   
+
+  imgproxy:
+    image: ghcr.io/imgproxy/imgproxy:latest
+    container_name: imgproxy
+    restart: unless-stopped
+    environment:
+      IMGPROXY_BIND: "0.0.0.0:8080"
+      IMGPROXY_KEY: ""
+      IMGPROXY_SALT: ""
+
+      # Security
+      IMGPROXY_USE_ETAG: "true"
+      IMGPROXY_MAX_SRC_FILE_SIZE: "10485760"
+      IMGPROXY_TIMEOUT: "5"
+      IMGPROXY_ALLOWED_PROTOCOLS: "https"
+    networks:
+      - rooms
+    expose:
+      - "8080"
+
   #----------------------------------------------------------------------------#
   #                                    VOLUMES                                 #
   #----------------------------------------------------------------------------#

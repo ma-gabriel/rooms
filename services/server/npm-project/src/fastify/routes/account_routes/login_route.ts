@@ -1,10 +1,7 @@
 import { FastifyInstance } from "fastify";
-import fastifyFormbody from "@fastify/formbody";
 import prismaInstance from "../../../prisma/instance";
 
 export default async function logInRoute(fastifyInstance: FastifyInstance) {
-  fastifyInstance.register(fastifyFormbody);
-
   fastifyInstance.post<{ Body: { username: string; password: string } }>(
     "/login",
     async (req, reply) => {
@@ -18,12 +15,12 @@ export default async function logInRoute(fastifyInstance: FastifyInstance) {
         if (user === null) {
           return reply
             .status(401)
-            .send({ success: false, reason: `${username} doesn't exist` });
+            .send({ success: false, message: `${username} doesn't exist` });
         }
         if (user.password !== password) {
           return reply
             .status(401)
-            .send({ success: false, reason: "Wrong password" });
+            .send({ success: false, message: "Wrong password" });
         }
         const token = fastifyInstance.jwt.sign(
           { id: user.id },

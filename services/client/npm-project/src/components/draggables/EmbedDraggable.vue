@@ -14,7 +14,7 @@
     @contextmenu="openMenu"
   >
     <svg
-    v-if="props.edit"
+      v-if="props.edit"
       style="position: absolute; top: 0%; right: 2%; height: 30%"
       fill="#FFFFFF"
       version="1.1"
@@ -127,22 +127,25 @@
         <input
           type="number"
           inputmode="numeric"
-          min="0"
-          max="360"
           required="true"
-          @input="
-            (e: InputEvent) =>
+          @change="
+            (e: Event) =>
               ((e.target as HTMLInputElement).value = String(
-                (r = Math.min(
-                  Math.max(
-                    parseInt((e.target as HTMLInputElement).value) || 0,
-                    0,
-                  ),
-                  360,
-                )),
+                (r =
+                  ((parseInt((e.target as HTMLInputElement).value) % 360) +
+                    360) %
+                  360),
               ))
           "
           :value="r"
+          @input="
+            (e: InputEvent) => {
+              if (e.data === '-') return ;
+              const input = e.target as HTMLInputElement;
+              if (input.value === '') input.value = '0';
+              r = parseInt(input.value) || 0;
+            }
+          "
         />
       </label>
       <button
@@ -160,7 +163,7 @@
 import { ref, onMounted, onBeforeUnmount, watch, reactive } from "vue";
 import type { DraggableItem } from "../../views/room_edit.vue";
 
-const props = defineProps<{ draggable: DraggableItem, edit: boolean }>();
+const props = defineProps<{ draggable: DraggableItem; edit: boolean }>();
 const id = props.draggable.id;
 
 const x = ref(30);
@@ -245,6 +248,7 @@ function openMenu(e: MouseEvent) {
 }
 
 function closeMenu() {
+  r.value = ((r.value % 360) + 360) % 360;
   if (size.value < 20) size.value = 20;
   menu.visible = false;
 }
@@ -310,7 +314,9 @@ onBeforeUnmount(() => {
   background-color: #444;
   color: white;
 }
-
+.context-menu input[type="number"] {
+  width: 10ch;
+}
 .context-menu button:hover {
   background-color: #666;
   cursor: pointer;

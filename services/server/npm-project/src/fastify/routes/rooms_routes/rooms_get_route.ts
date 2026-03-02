@@ -8,9 +8,8 @@ export default async function roomsGetRoute(fastifyInstance: FastifyInstance) {
       try {
         await req.jwtVerify();
         const user = await prismaInstance.user.findUnique({
-          where: {
-            id: req.user.id,
-          },
+          where: { id: req.user.id },
+          include: { rooms: true },
         });
         if (user === null) {
           return reply
@@ -41,7 +40,7 @@ export default async function roomsGetRoute(fastifyInstance: FastifyInstance) {
           })
           .send({
             success: true,
-            data: { draggables: user.draggables },
+            data: { draggables: user.rooms[0].draggables, privacy: user.rooms[0].privacy },
           });
       } catch (error) {
         return reply

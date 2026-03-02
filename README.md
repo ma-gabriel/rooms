@@ -1,5 +1,7 @@
-# Vue 3 + TypeScript + Vite
+# a social media nobody will watch
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+It's a social media, made using vue in front, fastify, prisma, postgres and nginx in back + a few other things like imgproxy for security
 
-Learn more about the recommended Project Setup and IDE Support in the [Vue Docs TypeScript Guide](https://vuejs.org/guide/typescript/overview.html#project-setup).
+The point of that project is to learn web, a bit of cyber, have a good portfolio and to have a website for my friends
+
+Also, coding alone, so do not wait for updates, accept them as they come

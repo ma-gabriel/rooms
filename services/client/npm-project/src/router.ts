@@ -7,11 +7,41 @@ import { useAuthStore } from "./stores/auth";
 import RoomView from "./views/room_view.vue";
 
 const routes = [
-  { path: "/:catchAll(.*)", component: Default, meta: { title: "home" } },
-  { path: "/login", component: Login, meta: { title: "sign in" } },
-  { path: "/edit", component: RoomEdit, meta: { requiresAuth: true } },
-  { path: "/view", component: RoomView, meta: { requiresAuth: true } },
-  { path: "/register", component: Register, meta: { title: "sign up" } },
+  {
+    path: "/:catchAll(.*)",
+    component: Default,
+    meta: { title: "home" },
+  },
+  {
+    path: "/",
+    name: "Home",
+    component: Default,
+    meta: { title: "home" },
+  },
+  {
+    path: "/login",
+    name: "Login",
+    component: Login,
+    meta: { title: "sign in" },
+  },
+  {
+    path: "/edit",
+    name: "Edit",
+    component: RoomEdit,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/view/:user",
+    name: "View",
+    component: RoomView,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/register",
+    name: "Register",
+    component: Register,
+    meta: { title: "sign up" },
+  },
 ];
 
 const router = createRouter({
@@ -27,7 +57,10 @@ router.beforeEach(async (to) => {
   }
 
   if (to.meta.requiresAuth && !auth.authenticated) {
-    return "/login";
+    return {
+      name: "Login",
+      query: { redirect: to.fullPath },
+    };
   }
 });
 

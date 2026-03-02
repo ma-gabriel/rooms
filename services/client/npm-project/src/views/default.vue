@@ -1,18 +1,76 @@
 <template>
-  <selection v-for="player in players" :key="player.name" :name="player.name" />
+  <selection v-for="user in users" :key="user.name" :name="user.name"/>
+  <button @click="logOut" class="logout-btn">
+    {{ auth.authenticated ? "log out" : "log in page" }}
+  </button>
+  <button class="edit-btn" @click="router.push({ name: 'Edit' })">
+    <svg
+      fill="#FFFFFF"
+      version="1.1"
+      id="Capa_1"
+      xmlns="http://www.w3.org/2000/svg"
+      xmlns:xlink="http://www.w3.org/1999/xlink"
+      width="10px"
+      height="10px"
+      viewBox="0 0 528.899 528.899"
+      xml:space="preserve"
+    >
+      <path
+        d="M328.883,89.125l107.59,107.589l-272.34,272.34L56.604,361.465L328.883,89.125z M518.113,63.177l-47.981-47.981
+		c-18.543-18.543-48.653-18.543-67.259,0l-45.961,45.961l107.59,107.59l53.611-53.611
+		C532.495,100.753,532.495,77.559,518.113,63.177z M0.3,512.69c-1.958,8.812,5.998,16.708,14.811,14.565l119.891-29.069
+		L27.473,390.597L0.3,512.69z"
+      />
+    </svg>
+  </button>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import selection from "../components/selection.vue";
 
-type Player = { name: string };
-const players = ref<Player[]>([]);
+import { useRouter } from "vue-router";
+import { useAuthStore, authFetch } from "../stores/auth";
+const router = useRouter();
+const auth = useAuthStore();
 
-players.value.push({ name: "Steven" });
-players.value.push({ name: "Greg" });
-players.value.push({ name: "Pearl" });
-players.value.push({ name: "Lapiz" });
+type User = { name: string };
+const users = ref<User[]>([]);
+
+onMounted(() => {
+  addUsers();
+});
+
+async function addUsers() {
+  try {
+    const res = await authFetch("/api/manyRooms");
+    const body = await res.json();
+    body.data.users.forEach((username: string) => {
+      users.value.push({ name: username });
+    });
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+function logOut() {
+  if (auth.authenticated) auth.logout();
+  else router.replace({ name: "Login" });
+}
 </script>
 
-<style scoped></style>
+<style scoped>
+.edit-btn {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  z-index: 1000;
+}
+.logout-btn {
+  position: fixed;
+  top: 60px;
+  right: 10px;
+  z-index: 1000;
+  background-color: #430000ff;
+}
+</style>

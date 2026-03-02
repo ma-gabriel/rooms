@@ -4,7 +4,7 @@ DOCKER_TARGET = Docker-compose.yml
 export COMPOSE_BAKE=true
 
 .PHONY: all
-all: start
+all: build start
 
 .PHONY: build
 build:
@@ -12,7 +12,7 @@ build:
 	$(DOCKER_COMPOSE) -f $(DOCKER_TARGET) build
 
 .PHONY: start
-start: build
+start:
 	$(DOCKER_COMPOSE) -f $(DOCKER_TARGET) up -d
 
 .PHONY: restart

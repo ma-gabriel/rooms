@@ -12,7 +12,7 @@
     @mousedown="edit && startDrag($event)"
     @contextmenu="openMenu"
     draggable="false"
-    :src="link || 'https://pc.net/img/terms/right-click.svg'"
+    :src="'/images/insecure/plain/' + (link || 'https://pc.net/img/terms/right-click.svg')"
   />
   <teleport to="body">
     <div
@@ -82,22 +82,25 @@
         <input
           type="number"
           inputmode="numeric"
-          min="0"
-          max="360"
           required="true"
-          @input="
-            (e: InputEvent) =>
+          @change="
+            (e: Event) =>
               ((e.target as HTMLInputElement).value = String(
-                (r = Math.min(
-                  Math.max(
-                    parseInt((e.target as HTMLInputElement).value) || 0,
-                    0,
-                  ),
-                  360,
-                )),
+                (r =
+                  ((parseInt((e.target as HTMLInputElement).value) % 360) +
+                    360) %
+                  360),
               ))
           "
           :value="r"
+          @input="
+            (e: InputEvent) => {
+              if (e.data === '-') return ;
+              const input = e.target as HTMLInputElement;
+              if (input.value === '') input.value = '0';
+              r = parseInt(input.value) || 0;
+            }
+          "
         />
       </label>
       <button
@@ -115,7 +118,7 @@
 import { ref, onMounted, onBeforeUnmount, watch, reactive } from "vue";
 import type { DraggableItem } from "../../views/room_edit.vue";
 
-const props = defineProps<{ draggable: DraggableItem, edit: boolean }>();
+const props = defineProps<{ draggable: DraggableItem; edit: boolean }>();
 const id = props.draggable.id;
 
 const x = ref(30);
@@ -200,6 +203,7 @@ function openMenu(e: MouseEvent) {
 }
 
 function closeMenu() {
+  r.value = ((r.value % 360) + 360) % 360;
   if (size.value < 3) size.value = 3;
   menu.visible = false;
 }
@@ -263,6 +267,10 @@ onBeforeUnmount(() => {
   border: 1px solid #555;
   background-color: #444;
   color: white;
+}
+
+.context-menu input[type="number"] {
+  width: 10ch;
 }
 
 .context-menu button:hover {

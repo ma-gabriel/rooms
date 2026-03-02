@@ -17,5 +17,27 @@ model User {
   id          Int     @id @default(autoincrement())
   username    String  @unique
   password    String
-  draggables  Json    @default(dbgenerated("'[]'::jsonb"))
+
+  rooms       Room[]
 }
+
+enum Privacy {
+  PRIVATE
+  RESTRICTED
+  PUBLIC
+}
+
+model Room {
+  id          Int     @id @default(autoincrement())
+  owner       User    @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId     Int     
+  draggables  Json    @default(dbgenerated("'[]'::jsonb"))
+  privacy     Privacy @default(PRIVATE)
+}
+
+/*
+rm -rf src/prisma/migrations/*
+npx prisma migrate reset -f
+npx prisma migrate dev --name init
+npx prisma generate
+*/

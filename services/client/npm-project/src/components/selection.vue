@@ -1,5 +1,5 @@
 <template>
-  <div class="player-list">
+  <div class="player-list" @click="router.push({name: 'View', params: {user: props.name}})">
     <div class="player-item">
       <div class="player-bg">
         <!-- Background SVG icons -->
@@ -17,17 +17,20 @@
       </div>
 
       <div class="player-content">
-        <span class="player-name">{{name}}</span>
+        <span class="player-name">{{ name }}</span>
       </div>
-
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-defineProps<{
-  name: string
-}>()
+
+import { useRouter } from "vue-router";
+const router = useRouter();
+
+const props = defineProps<{
+  name: string;
+}>();
 </script>
 
 <style scoped>

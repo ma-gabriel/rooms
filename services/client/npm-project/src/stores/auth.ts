@@ -5,7 +5,7 @@ export async function authFetch(url: string, options = {}) {
   const auth = useAuthStore();
   const res = await fetch(url, options);
   if (res.status === 401) {
-    router.push("/login");
+    router.push({ name: "Login" });
     auth.logout();
     throw new Error("Unauthorized: user has been logged out");
   }

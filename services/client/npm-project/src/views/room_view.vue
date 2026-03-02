@@ -1,5 +1,5 @@
 <template>
-  <button class="add-btn" @click="router.push('/')">
+  <button class="add-btn" @click="router.push({ name: 'Home' })">
     <svg
       fill="#FFFFFF"
       version="1.1"
@@ -22,7 +22,6 @@
       </g>
     </svg>
   </button>
-  <button @click="logOut" class="clear-btn">Log out</button>
   <TextDraggable
     v-for="item in textItems"
     :key="item.id"
@@ -54,11 +53,11 @@ import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import TextDraggable from "../components/draggables/textDraggable.vue";
 import ImgDraggable from "../components/draggables/imgDraggable.vue";
 import EmbedDraggable from "../components/draggables/EmbedDraggable.vue";
-import { authFetch, useAuthStore } from "../stores/auth";
-import { useRouter } from "vue-router";
 
+import { authFetch } from "../stores/auth";
+import { useRoute, useRouter } from "vue-router";
 const router = useRouter();
-const auth = useAuthStore();
+const route = useRoute();
 
 export type DraggableItem = {
   id: number;
@@ -98,9 +97,16 @@ function prevent(e: Event) {
 
 async function getItems() {
   try {
-    const res = await authFetch("/api/rooms");
+    console.log(route);
+    const res = await authFetch(
+      `/api/rooms${route.params.user ? `/${route.params.user}` : ""}`,
+    );
     const body = await res.json();
-    if (!body.success) return;
+    if (!body.success) {
+      alert(body.message);
+      await router.push({name: "Home"});
+      return;
+    }
     for (let i = 0; i < body.data.draggables.length; i++) {
       addDraggable(body.data.draggables[i]);
     }
@@ -127,11 +133,6 @@ const imageItems = computed(() =>
 const embedItems = computed(() =>
   items.value.filter((item) => item.type === "Embed"),
 );
-
-function logOut() {
-  auth.logout();
-  router.push("/login");
-}
 
 function eraseDraggable() {}
 function updateDraggable() {}

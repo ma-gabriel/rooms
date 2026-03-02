@@ -1,30 +1,50 @@
 import { FastifyInstance } from "fastify";
-import fastifyFormbody from "@fastify/formbody";
 import prismaInstance from "../../../prisma/instance";
 
 export default async function registerRoute(fastifyInstance: FastifyInstance) {
-  fastifyInstance.register(fastifyFormbody);
-
   fastifyInstance.post<{ Body: { username: string; password: string } }>(
     "/register",
     async (req, reply) => {
       const { username, password } = req.body;
       try {
+        if (!/^[0-9a-zA-Z_-]+$/.test(username))
+          return reply
+            .status(401)
+            .send({ success: false, message: "Come on, do better" });
         const checkUser = await prismaInstance.user.findFirst({
           where: {
             username: username,
           },
         });
         if (checkUser)
-          return reply
-            .status(401)
-            .send({ success: false, reason: `"${username}" is already taken` });
+          return reply.status(401).send({
+            success: false,
+            message: `"${username}" is already taken`,
+          });
         const newUser = await prismaInstance.user.create({
           data: {
             username: username,
             password: password,
           },
         });
+        if (!newUser) {
+          return reply.status(500).send({
+            success: false,
+            message: "for some reason didn't create the user. Try retrying",
+          });
+        }
+        const newRoom = await prismaInstance.room.create({
+          data: {
+            ownerId: newUser.id,
+          },
+        });
+        if (!newRoom) {
+          prismaInstance.user.delete({ where: { id: newUser.id } });
+          return reply.status(500).send({
+            success: false,
+            message: "for some reason didn't create your room. Try retrying",
+          });
+        }
         const token = fastifyInstance.jwt.sign(
           { id: newUser.id },
           { expiresIn: "15m" },
@@ -42,7 +62,7 @@ export default async function registerRoute(fastifyInstance: FastifyInstance) {
           data: { username: newUser.username },
         });
       } catch (error) {
-        reply.status(500).send({ success: false, reason: String(error) });
+        reply.status(500).send({ success: false, message: String(error) });
       }
     },
   );
