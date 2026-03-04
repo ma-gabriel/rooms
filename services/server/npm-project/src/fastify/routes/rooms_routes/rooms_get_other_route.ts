@@ -1,7 +1,18 @@
 import { FastifyInstance } from "fastify";
 import prismaInstance from "../../../prisma/instance";
+import { getImgproxyUrl } from "../../../imgproxy/utils";
 
-export default async function roomsGetOtherRoute(fastifyInstance: FastifyInstance) {
+function transformDraggables(items: any[]): any[] {
+  return items.map((item) =>
+    item.type === "Img" && item.link
+      ? { ...item, link: getImgproxyUrl(item.link) }
+      : item,
+  );
+}
+
+export default async function roomsGetOtherRoute(
+  fastifyInstance: FastifyInstance,
+) {
   fastifyInstance.get<{
     Body: { username: string; password: string };
     Params: { user: string };
@@ -26,7 +37,7 @@ export default async function roomsGetOtherRoute(fastifyInstance: FastifyInstanc
       return reply.send({
         success: true,
         message: "Welcome",
-        data: { draggables: user.rooms[0].draggables },
+        data: { draggables: transformDraggables(user.rooms[0].draggables) },
       });
     } catch (error) {
       return reply

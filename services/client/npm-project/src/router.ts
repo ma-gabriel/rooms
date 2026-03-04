@@ -34,7 +34,6 @@ const routes = [
     path: "/view/:user",
     name: "View",
     component: RoomView,
-    meta: { requiresAuth: true },
   },
   {
     path: "/register",

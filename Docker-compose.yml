@@ -68,15 +68,30 @@ services:
     container_name: imgproxy
     restart: unless-stopped
     environment:
+      # Bind
       IMGPROXY_BIND: "0.0.0.0:8080"
-      IMGPROXY_KEY: ""
-      IMGPROXY_SALT: ""
 
-      # Security
-      IMGPROXY_USE_ETAG: "true"
-      IMGPROXY_MAX_SRC_FILE_SIZE: "10485760"
+      # Security / Signing
+      IMGPROXY_KEY: "68617368"
+      IMGPROXY_SALT: "68617368"
+      IMGPROXY_ENABLE_URL_SIGNING: "true"
+
+      # Download / Allowed sources
+      IMGPROXY_ALLOWED_PROTOCOLS: "http,https"
+      IMGPROXY_ALLOW_SVG: "true"
+      IMGPROXY_MAX_SRC_FILE_SIZE: "10485760"  # 10MB
       IMGPROXY_TIMEOUT: "5"
-      IMGPROXY_ALLOWED_PROTOCOLS: "https"
+
+      # Block internal / unsafe addresses
+      IMGPROXY_BLOCK_LOCALHOST: "true"
+      IMGPROXY_BLOCK_PRIVATE_IPS: "true"   # blocks 10.x, 172.16–31.x, 192.168.x.x
+      IMGPROXY_BLOCK_LINK_LOCAL: "true"    # blocks 169.254.x.x
+
+      # Only allow common image MIME types
+      IMGPROXY_ALLOWED_CONTENT_TYPES: "image/jpeg,image/png,image/webp,image/gif,image/svg+xml"
+
+      # Optional optimizations
+      IMGPROXY_USE_ETAG: "true"
     networks:
       - rooms
     expose:

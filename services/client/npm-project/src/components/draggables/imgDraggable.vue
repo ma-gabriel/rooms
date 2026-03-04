@@ -12,7 +12,7 @@
     @mousedown="edit && startDrag($event)"
     @contextmenu="openMenu"
     draggable="false"
-    :src="'/images/insecure/plain/' + (link || 'https://pc.net/img/terms/right-click.svg')"
+    :src="link || 'https://pc.net/img/terms/right-click.svg'"
   />
   <teleport to="body">
     <div

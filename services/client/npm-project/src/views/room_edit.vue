@@ -111,7 +111,7 @@ let intialDraggablesCounter = 0;
 // basically to avoid counting the first update as a change,
 // which instancies the Draggable
 
-const privacy = ref(false);
+const privacy = ref<undefined | "PRIVATE" | "RESTRICTED" | "PUBLIC">(undefined);
 
 onMounted(() => {
   document.addEventListener("contextmenu", prevent);

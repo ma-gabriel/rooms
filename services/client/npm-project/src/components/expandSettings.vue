@@ -45,6 +45,7 @@ async function changePrivacy(e: Event) {
 
 <style scoped>
 .expanding-div {
+  z-index: 1000000000;
   position: absolute;
   top: 110px;
   right: 10px;
@@ -104,7 +105,6 @@ async function changePrivacy(e: Event) {
   font-size: 14px;
   cursor: pointer;
   width: 100%;
-  /* appearance: none; */
   outline: none;
   transition:
     background-color 0.3s ease,

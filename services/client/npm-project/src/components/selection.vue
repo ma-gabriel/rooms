@@ -15,7 +15,6 @@
           <polygon points="12,2 22,22 2,22" />
         </svg>
       </div>
-
       <div class="player-content">
         <span class="player-name">{{ name }}</span>
       </div>

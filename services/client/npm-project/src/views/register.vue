@@ -58,7 +58,7 @@
 
       <p class="switch-link">
         Already have an account?
-        <RouterLink to="/login" replace>Login</RouterLink>
+        <RouterLink :to="{ name: 'Login', query: $route.query }" replace>login</RouterLink>
       </p>
     </form>
   </div>
