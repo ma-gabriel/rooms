@@ -28,8 +28,9 @@ rm: stop
 	$(DOCKER_COMPOSE) -f $(DOCKER_TARGET) rm
 
 .PHONY: prune
-prune: stop
-	docker system prune --all --force
+prune:
+	$(DOCKER_COMPOSE) -f $(DOCKER_TARGET) down -v
+	docker system prune --all --force --volumes
 
 .PHONY: db
 db:

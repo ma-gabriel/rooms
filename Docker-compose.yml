@@ -48,7 +48,6 @@ services:
   #----------------------------------------------------------------------------#
   #                                   DB                                       #
   #----------------------------------------------------------------------------#
-
   postgres:
     image: postgres:16
     container_name: postgres_db
@@ -63,6 +62,9 @@ services:
       - rooms
   
 
+  #----------------------------------------------------------------------------#
+  #                                   IMGPROXY                                 #
+  #----------------------------------------------------------------------------#
   imgproxy:
     image: ghcr.io/imgproxy/imgproxy:latest
     container_name: imgproxy
@@ -117,6 +119,7 @@ volumes:
       o: bind
       type: none
   postgres_data:
+    name: postgres_data
   www:
     name: www
     driver: local
@@ -125,7 +128,9 @@ volumes:
       o: bind
       type: none
   node_modules_client:
+    name: node_modules_client
   node_modules_server:
+    name: node_modules_server
 
 networks:
   rooms:
