@@ -9,6 +9,7 @@ all: build start
 .PHONY: build
 build:
 	mkdir -p built_data/www
+	mkdir -p built_data/db
 	$(DOCKER_COMPOSE) -f $(DOCKER_TARGET) build
 
 .PHONY: start

@@ -120,6 +120,11 @@ volumes:
       type: none
   postgres_data:
     name: postgres_data
+    driver: local
+    driver_opts:
+      device: ./built_data/db
+      o: bind
+      type: none
   www:
     name: www
     driver: local

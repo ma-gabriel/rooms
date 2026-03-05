@@ -11,10 +11,10 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 import selection from "../components/selection.vue";
+import PencilSVG from "../components/svg/pencilSVG.vue";
 
 import { useRouter } from "vue-router";
 import { useAuthStore, authFetch } from "../stores/auth";
-import PencilSVG from "../components/svg/pencilSVG.vue";
 const router = useRouter();
 const auth = useAuthStore();
 

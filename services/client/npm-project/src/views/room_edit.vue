@@ -153,6 +153,7 @@ function updateDraggable(updated: DraggableItem) {
 }
 
 function eraseDraggable(id: number) {
+  changes.value = true;
   items.value = items.value.filter((item) => item.id !== id);
 }
 
