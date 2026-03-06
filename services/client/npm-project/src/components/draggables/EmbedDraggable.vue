@@ -8,7 +8,7 @@
       'z-index': z,
       width: size + '%',
       height: size + '%',
-      transform: 'rotate(' + r + 'deg)',
+      transform: 'rotate(' + modulo(r, 360) + 'deg)',
     }"
     @mousedown="edit && startDrag($event)"
     @contextmenu="openMenu"
@@ -104,24 +104,9 @@
           type="number"
           inputmode="numeric"
           required="true"
-          @change="
-            (e: Event) =>
-              ((e.target as HTMLInputElement).value = String(
-                (r =
-                  ((parseInt((e.target as HTMLInputElement).value) % 360) +
-                    360) %
-                  360),
-              ))
-          "
           :value="r"
-          @input="
-            (e: InputEvent) => {
-              if (e.data === '-') return;
-              const input = e.target as HTMLInputElement;
-              if (input.value === '') input.value = '0';
-              r = parseInt(input.value) || 0;
-            }
-          "
+          @change="(e) => (r = onChangeRotate(e))"
+          @input="(e) => (r = onInputRotate(e, r))"
         />
       </label>
       <button
@@ -137,8 +122,9 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, watch, reactive } from "vue";
-import type { DraggableItem } from "../../views/room_edit.vue";
-import MouseSVG from "../svg/mouseSVG.vue";
+import type { DraggableItem } from "../../views/RoomEdit.vue";
+import MouseSVG from "../svg/MouseSVG.vue";
+import { modulo, onChangeRotate, onInputRotate } from "./utils";
 
 const props = defineProps<{ draggable: DraggableItem; edit: boolean }>();
 const id = props.draggable.id;
@@ -225,7 +211,7 @@ function openMenu(e: MouseEvent) {
 }
 
 function closeMenu() {
-  r.value = ((r.value % 360) + 360) % 360;
+  r.value = modulo(r.value, 360); 
   if (size.value < 20) size.value = 20;
   menu.visible = false;
 }

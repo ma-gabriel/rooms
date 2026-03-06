@@ -1,21 +1,21 @@
 import { createRouter, createWebHistory } from "vue-router";
-import RoomEdit from "./views/room_edit.vue";
-import Login from "./views/login.vue";
-import Default from "./views/default.vue";
-import Register from "./views/register.vue";
+import RoomEdit from "./views/RoomEdit.vue";
+import Login from "./views/Login.vue";
+import Home from "./views/Home.vue";
+import Register from "./views/Register.vue";
 import { useAuthStore } from "./stores/auth";
-import RoomView from "./views/room_view.vue";
+import RoomView from "./views/RoomView.vue";
 
 const routes = [
   {
     path: "/:catchAll(.*)",
-    component: Default,
+    component: Home,
     meta: { title: "home" },
   },
   {
     path: "/",
     name: "Home",
-    component: Default,
+    component: Home,
     meta: { title: "home" },
   },
   {

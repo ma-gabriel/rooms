@@ -1,16 +1,16 @@
 <template>
-  <div class="player-list" @click="router.push({name: 'View', params: {user: props.name}})">
+  <div
+    class="player-list"
+    @click="router.push({ name: 'View', params: { user: props.name } })"
+  >
     <div class="player-item">
       <div class="player-bg">
-        <!-- Background SVG icons -->
         <svg class="bg-icon icon-1" viewBox="0 0 24 24">
           <circle cx="12" cy="12" r="10" />
         </svg>
-
         <svg class="bg-icon icon-2" viewBox="0 0 24 24">
           <rect x="4" y="4" width="16" height="16" />
         </svg>
-
         <svg class="bg-icon icon-3" viewBox="0 0 24 24">
           <polygon points="12,2 22,22 2,22" />
         </svg>
@@ -23,7 +23,6 @@
 </template>
 
 <script setup lang="ts">
-
 import { useRouter } from "vue-router";
 const router = useRouter();
 

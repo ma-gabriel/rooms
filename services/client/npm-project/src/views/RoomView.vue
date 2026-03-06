@@ -30,13 +30,13 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
-import TextDraggable from "../components/draggables/textDraggable.vue";
-import ImgDraggable from "../components/draggables/imgDraggable.vue";
+import TextDraggable from "../components/draggables/TextDraggable.vue";
+import ImgDraggable from "../components/draggables/ImgDraggable.vue";
 import EmbedDraggable from "../components/draggables/EmbedDraggable.vue";
 
 import { authFetch } from "../stores/auth";
 import { useRoute, useRouter } from "vue-router";
-import HomeSVG from "../components/svg/homeSVG.vue";
+import HomeSVG from "../components/svg/HomeSVG.vue";
 const router = useRouter();
 const route = useRoute();
 

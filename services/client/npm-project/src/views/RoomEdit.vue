@@ -1,33 +1,27 @@
 <template>
-  <button class="add-btn" @click="goBackHome">
-    <HomeSVG/>
-  </button>
-  <button
-    @click="addDraggable({ type: 'Text', id: 0 }); changes = true"
-    class="add-btn"
-    style="top: 60px"
-  >
-    Add Text
-  </button>
-  <button
-    @click="addDraggable({ type: 'Img', id: 0 }); changes = true"
-    class="add-btn"
-    style="top: 110px"
-  >
-    Add Image
-  </button>
-  <button
-    @click="addDraggable({ type: 'Embed', id: 0 }); changes = true"
-    class="add-btn"
-    style="top: 160px"
-  >
-    Add Embed (youtube for now)
-  </button>
-  <button v-if="changes" @click="save" class="save-btn">save</button>
-  <button v-if="items.length > 0" @click="clearDraggable()" class="clear-btn">
-    Erase Everything
-  </button>
-  <expandSettings v-if="privacy" :privacy="privacy" />
+  <aside class="editor-toolbar">
+    <button class="tool-btn" @click="goBackHome"><HomeSVG /></button>
+    <button class="tool-btn" @click="addDraggableBtn('Text')">+ Text</button>
+    <button class="tool-btn" @click="addDraggableBtn('Img')">+ Image</button>
+    <button class="tool-btn" @click="addDraggableBtn('Embed')">+ Embed</button>
+  </aside>
+  <div class="editor-actions">
+    <button v-if="changes" @click="save" class="save-btn">Save changes</button>
+    <button
+      v-if="items.length > 0"
+      class="danger-btn"
+      @click="clearDraggable()"
+      @update="updatePrivacy"
+    >
+      Clear
+    </button>
+    <button class="settings-btn" @click="togglePrivacyTab">⚙</button>
+    <PrivacySettings
+      v-if="privacy && openPrivacyTab"
+      :privacy="privacy"
+      @close="togglePrivacyTab"
+    />
+  </div>
   <TextDraggable
     v-for="item in textItems"
     :key="item.id"
@@ -36,6 +30,7 @@
     @erase="eraseDraggable"
     @update="updateDraggable"
   />
+
   <ImgDraggable
     v-for="item in imageItems"
     :key="item.id"
@@ -44,6 +39,7 @@
     @erase="eraseDraggable"
     @update="updateDraggable"
   />
+
   <EmbedDraggable
     v-for="item in embedItems"
     :key="item.id"
@@ -53,16 +49,15 @@
     @update="updateDraggable"
   />
 </template>
-
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
-import TextDraggable from "../components/draggables/textDraggable.vue";
-import ImgDraggable from "../components/draggables/imgDraggable.vue";
+import TextDraggable from "../components/draggables/TextDraggable.vue";
+import ImgDraggable from "../components/draggables/ImgDraggable.vue";
 import EmbedDraggable from "../components/draggables/EmbedDraggable.vue";
-import expandSettings from "../components/expandSettings.vue";
+import PrivacySettings from "../components/PrivacySettings.vue";
 import { authFetch } from "../stores/auth";
 import { useRouter } from "vue-router";
-import HomeSVG from "../components/svg/homeSVG.vue";
+import HomeSVG from "../components/svg/HomeSVG.vue";
 
 const router = useRouter();
 
@@ -87,6 +82,8 @@ export type DraggableItem = {
   //embed
   videoId?: string;
 };
+export type PrivacyType = "PRIVATE" | "RESTRICTED" | "PUBLIC";
+
 const items = ref<DraggableItem[]>([]);
 
 const changes = ref(false);
@@ -94,7 +91,14 @@ let intialDraggablesCounter = 0;
 // basically to avoid counting the first update as a change,
 // which instancies the Draggable
 
-const privacy = ref<undefined | "PRIVATE" | "RESTRICTED" | "PUBLIC">(undefined);
+const privacy = ref<undefined | PrivacyType>(undefined);
+const openPrivacyTab = ref(false);
+function togglePrivacyTab() {
+  openPrivacyTab.value = !openPrivacyTab.value;
+}
+function updatePrivacy(newPrivacy: PrivacyType) {
+  privacy.value = newPrivacy;
+}
 
 onMounted(() => {
   document.addEventListener("contextmenu", prevent);
@@ -130,6 +134,11 @@ function addDraggable(next: DraggableItem) {
     items.value.length && Math.max(...items.value.map((item) => item.id));
   copy.id = maxId + 1;
   items.value.push(copy);
+}
+
+function addDraggableBtn(type: "Img" | "Text" | "Embed") {
+  addDraggable({ type, id: 0 });
+  changes.value = true;
 }
 
 const textItems = computed(() =>
@@ -183,24 +192,89 @@ function goBackHome() {
 </script>
 
 <style scoped>
-.add-btn {
+.editor-toolbar {
   position: fixed;
-  top: 10px;
-  left: 10px;
+  top: 20px;
+  left: 20px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  background: #1e1f24;
+  border: 1px solid #2a2c33;
+  border-radius: 12px;
+  padding: 10px;
+
   z-index: 2147483646;
 }
-.clear-btn {
-  position: fixed;
-  top: 60px;
-  right: 10px;
-  z-index: 1000;
-  background-color: #430000ff;
+
+.tool-btn {
+  background: #2a2c33;
+  color: #e6e6e6;
+  border: none;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+
+  font-size: 0.9rem;
 }
+
+.tool-btn:hover {
+  background: #333640;
+}
+
+.editor-actions {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+
+  display: flex;
+  gap: 10px;
+  z-index: 2000;
+}
+
+.settings-btn {
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  border-radius: 10px;
+  border: 1px solid #2a2c33;
+  background: #1e1f24;
+  color: #e6e6e6;
+  cursor: pointer;
+}
+
+.settings-btn:hover {
+  background: #2a2c33;
+}
+
 .save-btn {
-  position: fixed;
-  top: 10px;
-  right: 10px;
-  z-index: 1000;
-  background-color: rgb(44, 67, 0);
+  background: #2d6a4f;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.save-btn:hover {
+  background: #3a8a65;
+}
+
+.danger-btn {
+  background: #4a2020;
+  color: #ff9090;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.danger-btn:hover {
+  background: #5c2626;
 }
 </style>
