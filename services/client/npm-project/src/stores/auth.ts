@@ -39,11 +39,16 @@ export const useAuthStore = defineStore("auth", {
         this.loaded = true;
       }
     },
-    logout() {
-      fetch("/api/logout", { method: "POST" });
-      this.user = null;
-      this.authenticated = false;
-      this.loaded = true;
+    async logout() {
+      try {
+        const res = await fetch("/api/logout", { method: "POST" });
+        const body = await res.json();
+        if (body.success) {
+          this.user = null;
+          this.authenticated = false;
+          this.loaded = true;
+        }
+      } catch (e) {}
     },
     login(username: string) {
       this.user = username;

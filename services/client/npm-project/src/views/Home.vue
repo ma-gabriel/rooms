@@ -7,22 +7,30 @@
       </header>
 
       <div class="rooms-list">
-        <Selection
-          v-for="user in users"
-          :key="user.name"
-          :name="user.name"
-        />
+        <Selection v-for="user in users" :key="user.name" :name="user.name" />
       </div>
     </section>
 
     <div class="actions">
-      <button class="edit-btn" @click="router.push({ name: 'Edit' })">
+      <button
+        class="edit-btn"
+        v-if="auth.authenticated"
+        @click="router.push({ name: 'Edit' })"
+      >
         <PencilSVG />
       </button>
-
-      <button @click="logOut" class="logout-btn">
-        {{ auth.authenticated ? "Log out" : "Log in" }}
+      <button @click="logIn" v-if="!auth.authenticated" class="login-btn">
+        Log in
       </button>
+
+      <button
+        class="settings-btn"
+        v-if="auth.authenticated"
+        @click="toggleSettingsTab"
+      >
+        ⚙
+      </button>
+      <AccountSettings v-if="openSettingsTab" @close="toggleSettingsTab" />
     </div>
   </main>
 </template>
@@ -33,11 +41,17 @@ import PencilSVG from "../components/svg/PencilSVG.vue";
 
 import { useRouter } from "vue-router";
 import { useAuthStore, authFetch } from "../stores/auth";
+import AccountSettings from "../components/AccountSettings.vue";
 const router = useRouter();
 const auth = useAuthStore();
 
 type User = { name: string };
 const users = ref<User[]>([]);
+
+const openSettingsTab = ref(false);
+function toggleSettingsTab() {
+  openSettingsTab.value = !openSettingsTab.value;
+}
 
 onMounted(() => {
   addUsers();
@@ -55,13 +69,13 @@ async function addUsers() {
   }
 }
 
-function logOut() {
-  if (auth.authenticated) auth.logout();
-  else router.replace({ name: "Login" });
+function logIn() {
+  router.replace({ name: "Login" });
 }
 </script>
 
-<style scoped>.page {
+<style scoped>
+.page {
   max-width: 520px;
   margin: auto;
   padding: 2rem 1rem;
@@ -123,8 +137,22 @@ function logOut() {
   cursor: pointer;
 }
 
-.logout-btn {
-  background: #3a2323;
-  color: #ff8a8a;
+.settings-btn {
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  border-radius: 10px;
+  border: 1px solid #2a2c33;
+  background: #1e1f24;
+  color: #e6e6e6;
+  cursor: pointer;
+}
+
+.login-btn {
+  background: #233a23;
+  color: #a5ff8a;
 }
 </style>

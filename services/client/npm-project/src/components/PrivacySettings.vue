@@ -163,4 +163,22 @@ input {
   color: white;
   cursor: pointer;
 }
+.privacy-options label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 6px;
+}
+
+.privacy-options label:hover {
+  background: #2a2c33;
+}
+
+.privacy-options input[type="radio"] {
+  width: auto;
+  accent-color: #2d6a4f;
+  cursor: pointer;
+}
 </style>
