@@ -78,7 +78,6 @@ function prevent(e: Event) {
 
 async function getItems() {
   try {
-    console.log(route);
     const res = await authFetch(
       `/api/rooms${route.params.user ? `/${route.params.user}` : ""}`,
     );

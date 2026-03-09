@@ -5,8 +5,6 @@
     id="Capa_1"
     xmlns="http://www.w3.org/2000/svg"
     xmlns:xlink="http://www.w3.org/1999/xlink"
-    width="10px"
-    height="10px"
     viewBox="0 0 528.899 528.899"
     xml:space="preserve"
   >

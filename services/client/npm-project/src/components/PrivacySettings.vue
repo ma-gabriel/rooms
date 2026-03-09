@@ -1,63 +1,75 @@
 <template>
-  <div class="overlay" @click="$emit('close')"></div>
-  <aside class="settings-panel">
-    <h2>Room settings</h2>
-    <div class="setting">
-      <label>Privacy</label>
-      <div class="privacy-options">
-        <label>
-          <input type="radio" value="PUBLIC" v-model="privacy" />
-          Public
-        </label>
-        <label>
-          <input type="radio" value="RESTRICTED" v-model="privacy" />
-          Restricted
-        </label>
-        <label>
-          <input type="radio" value="PRIVATE" v-model="privacy" />
-          Private
-        </label>
-      </div>
-    </div>
-    <div v-if="privacy === 'RESTRICTED'" class="setting">
-      <label>Allowed users</label>
-
-      <input
-        v-model="newUser"
-        placeholder="Add username"
-        @keydown.enter="addUser"
-      />
-
-      <div class="user-list">
-        <div v-for="user in allowedUsers" :key="user" class="user-item">
-          {{ user }}
-          <button @click="removeUser(user)">✕</button>
+  <div class="overlay" @click="closeSelf"></div>
+  <Transition name="slide">
+    <aside v-if="appear" class="settings-panel">
+      <h2>Room settings</h2>
+      <div class="setting">
+        <label>Privacy</label>
+        <div class="privacy-options">
+          <label>
+            <input type="radio" value="PUBLIC" v-model="privacy" />
+            Public
+          </label>
+          <label>
+            <input type="radio" value="RESTRICTED" v-model="privacy" />
+            Restricted
+          </label>
+          <label>
+            <input type="radio" value="PRIVATE" v-model="privacy" />
+            Private
+          </label>
         </div>
       </div>
-    </div>
+      <div v-if="privacy === 'RESTRICTED'" class="setting">
+        <label>Allowed users</label>
 
-    <button class="save-btn" @click="saveSettings">Save settings</button>
-  </aside>
+        <input
+          v-model="newUser"
+          placeholder="Add username"
+          @keydown.enter="addUser"
+        />
+
+        <div class="user-list">
+          <div v-for="user in allowedUsers" :key="user" class="user-item">
+            {{ user }}
+            <button @click="removeUser(user)">✕</button>
+          </div>
+        </div>
+      </div>
+
+      <button class="save-btn" @click="saveSettings">Save settings</button>
+    </aside>
+  </Transition>
 </template>
 <script setup lang="ts">
 import { authFetch } from "../stores/auth";
 import { ref, onMounted, onUnmounted } from "vue";
 import type { PrivacyType } from "../views/RoomEdit.vue";
 
+const appear = ref(false);
 const emit = defineEmits<{
   (e: "close"): void;
   (e: "update", privacy: PrivacyType): void;
 }>();
 
-function handleKey(e: KeyboardEvent) {
-  if (e.key === "Escape") emit("close");
+function closeSelf() {
+  appear.value = false;
+  setTimeout(() => emit("close"), 100);
 }
 
-onMounted(() => window.addEventListener("keydown", handleKey));
+function handleKey(e: KeyboardEvent) {
+  if (e.key === "Escape") {
+    closeSelf();
+  }
+}
+
+onMounted(() => {
+  window.addEventListener("keydown", handleKey);
+  appear.value = true;
+});
 onUnmounted(() => window.removeEventListener("keydown", handleKey));
 const props = defineProps<{ privacy: "PRIVATE" | "RESTRICTED" | "PUBLIC" }>();
 
-const open = ref(false);
 const privacy = ref(props.privacy);
 
 const allowedUsers = ref<string[]>([]);
@@ -75,7 +87,7 @@ function removeUser(name: string) {
 
 async function saveSettings() {
   try {
-    await authFetch("/api/privacy", {
+    const res = await authFetch("/api/privacy", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -85,8 +97,13 @@ async function saveSettings() {
         allowedUsers: allowedUsers.value,
       }),
     });
+    const body = await res.json();
+    if (body.success) {
+      emit("update", body.data.privacy);
+      closeSelf();
+    }
   } catch (e) {
-    open.value = false;
+    alert(e);
   }
 }
 </script>
@@ -180,5 +197,23 @@ input {
   width: auto;
   accent-color: #2d6a4f;
   cursor: pointer;
+}
+
+/* Slide animation */
+
+/* Slide animation */
+.slide-leave-from,
+.slide-enter-to {
+  transform: translateX(0);
+}
+.slide-leave-to,
+.slide-enter-from {
+  transform: translateX(100%);
+}
+.slide-enter-active {
+  transition: transform 0.25s ease;
+}
+.slide-leave-active {
+  transition: transform 0.1s ease;
 }
 </style>

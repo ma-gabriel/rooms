@@ -9,7 +9,7 @@ export async function needConnection(
     await req.jwtVerify();
     const token = fastifyInstance.jwt.sign(
       { id: req.user.id },
-      { expiresIn: "15m" },
+      { expiresIn: "1d" },
     );
     reply.setCookie("token", token, {
       path: "/",

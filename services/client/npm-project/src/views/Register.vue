@@ -119,7 +119,7 @@ async function register() {
       serverAnswer.value = body.message;
       return;
     }
-    auth.login(body.data.username);
+    auth.logIn(body.data.username);
     await goQueryOrHome();
   } catch (err) {
     console.error(err);

@@ -22,7 +22,7 @@ export default async function logInRoute(fastifyInstance: FastifyInstance) {
       }
       const token = fastifyInstance.jwt.sign(
         { id: user.id },
-        { expiresIn: "15m" },
+        { expiresIn: "1d" },
       );
       reply.setCookie("token", token, {
         path: "/",

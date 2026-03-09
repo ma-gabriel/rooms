@@ -16,7 +16,7 @@
         </svg>
       </div>
       <div class="player-content">
-        <span class="player-name">{{ name }}</span>
+        <span class="player-name">{{ name.substring(0, 20) }}</span>
       </div>
     </div>
   </div>
@@ -40,7 +40,6 @@ body {
 
 /* Container */
 .player-list {
-  width: 400px;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -48,9 +47,10 @@ body {
 
 /* Each row */
 .player-item {
+  aspect-ratio:  7 / 1;
   position: relative;
-  height: 60px;
-  border-radius: 12px;
+  width: 100%;
+  border-radius: 10px;
   background: linear-gradient(135deg, #1e293b, #0f172a);
   overflow: hidden;
   cursor: pointer;

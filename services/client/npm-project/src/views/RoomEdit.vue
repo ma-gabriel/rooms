@@ -11,7 +11,6 @@
       v-if="items.length > 0"
       class="danger-btn"
       @click="clearDraggable()"
-      @update="updatePrivacy"
     >
       Clear
     </button>
@@ -20,6 +19,7 @@
       v-if="privacy && openPrivacyTab"
       :privacy="privacy"
       @close="togglePrivacyTab"
+      @update="updatePrivacy"
     />
   </div>
   <TextDraggable
