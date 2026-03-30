@@ -1,18 +1,105 @@
 services:
   #----------------------------------------------------------------------------#
-  #                                    CLIENT                                  #
+  #                                 CLIENT                                     #
   #----------------------------------------------------------------------------#
   client:
-    ports:
-      - 8080:8080
     container_name: client
     image: client
     build:
       context: services/client/
     volumes:
       - client_volume:/var/npm-project
-      - node_modules:/var/npm-project/node_modules
+      - node_modules_client:/var/npm-project/node_modules
+      - www:/var/www
     restart: "always"
+  
+  #----------------------------------------------------------------------------#
+  #                                  SERVER                                    #
+  #----------------------------------------------------------------------------#
+  server:
+    container_name: server
+    image: server
+    build:
+      context: services/server/
+    volumes:
+      - server_volume:/var/npm-project
+      - node_modules_server:/var/npm-project/node_modules
+      - www:/var/www
+    networks:
+      - rooms
+    environment:
+      DATABASE_URL: postgresql://rooms_user:rooms_password@postgres_db:5432/rooms_db
+    env_file: "services/server/.env"
+    restart: "always"
+
+  #----------------------------------------------------------------------------#
+  #                                   NGINX                                    #
+  #----------------------------------------------------------------------------#
+  nginx:
+    container_name: nginx
+    image: nginx
+    build:
+      context: services/nginx/
+    ports:
+      - 8080:80
+    networks:
+      - rooms
+    restart: "always"
+
+  #----------------------------------------------------------------------------#
+  #                                   DB                                       #
+  #----------------------------------------------------------------------------#
+  postgres:
+    image: postgres:16
+    container_name: postgres_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: rooms_user
+      POSTGRES_PASSWORD: rooms_password
+      POSTGRES_DB: rooms_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - rooms
+  
+
+  #----------------------------------------------------------------------------#
+  #                                   IMGPROXY                                 #
+  #----------------------------------------------------------------------------#
+  imgproxy:
+    image: ghcr.io/imgproxy/imgproxy:latest
+    container_name: imgproxy
+    restart: unless-stopped
+    environment:
+      # Bind
+      IMGPROXY_BIND: "0.0.0.0:8080"
+
+      # Security / Signing
+      IMGPROXY_KEY: "68617368"
+      IMGPROXY_SALT: "68617368"
+      IMGPROXY_ENABLE_URL_SIGNING: "true"
+
+      # Download / Allowed sources
+      IMGPROXY_ALLOWED_PROTOCOLS: "http,https"
+      IMGPROXY_ALLOW_SVG: "true"
+      IMGPROXY_MAX_SRC_FILE_SIZE: "10485760"  # 10MB
+      IMGPROXY_TIMEOUT: "5"
+      IMGPROXY_MAX_ANIMATION_FRAMES: "10000"
+
+      # Block internal / unsafe addresses
+      IMGPROXY_BLOCK_LOCALHOST: "true"
+      IMGPROXY_BLOCK_PRIVATE_IPS: "true"   # blocks 10.x, 172.16–31.x, 192.168.x.x
+      IMGPROXY_BLOCK_LINK_LOCAL: "true"    # blocks 169.254.x.x
+
+      # Only allow common image MIME types
+      IMGPROXY_ALLOWED_CONTENT_TYPES: "image/jpeg,image/png,image/webp,image/gif,image/svg+xml"
+
+      # Optional optimizations
+      IMGPROXY_USE_ETAG: "true"
+    networks:
+      - rooms
+    expose:
+      - "8080"
 
   #----------------------------------------------------------------------------#
   #                                    VOLUMES                                 #
@@ -26,7 +113,31 @@ volumes:
       device: ./services/client/npm-project
       o: bind
       type: none
-  node_modules:
+  server_volume:
+    name: server_volume
+    driver: local
+    driver_opts:
+      device: ./services/server/npm-project
+      o: bind
+      type: none
+  postgres_data:
+    name: postgres_data
+    driver: local
+    driver_opts:
+      device: ./built_data/db
+      o: bind
+      type: none
+  www:
+    name: www
+    driver: local
+    driver_opts:
+      device: ./built_data/www
+      o: bind
+      type: none
+  node_modules_client:
+    name: node_modules_client
+  node_modules_server:
+    name: node_modules_server
 
 networks:
   rooms:

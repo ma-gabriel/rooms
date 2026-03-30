@@ -1,69 +1,81 @@
 <template>
   <div
     class="draggable"
-    :style="{ top: y - size / 5 + '%', left: x + '%', 'z-index': z, color: color, 'font-size': size * 10 + '%', transform: 'rotate(' + r + 'deg)' }"
-    @mousedown="startDrag"
+    :class="{ editable: edit }"
+    :style="{
+      top: y + '%',
+      left: x + '%',
+      'z-index': z,
+      color: color,
+      'font-size': size / 10 + 'vw',
+      transform: 'rotate(' + modulo(r, 360) + 'deg)',
+    }"
+    @mousedown="edit && startDrag($event)"
     @contextmenu="openMenu"
   >
-    {{ text }}
+    {{ text || "right click" }}
   </div>
   <teleport to="body">
     <div
-        type="menu"
-        v-if="menu.visible"
-        class="context-menu"
-        :style="{ top: menu.y + 'px', left: menu.x + 'px' }"
-        @mousedown.stop
-        @contextmenu.stop.prevent
+      type="menu"
+      v-if="menu.visible && props.edit"
+      class="context-menu"
+      :style="{ top: menu.y + 'px', left: menu.x + 'px' }"
+      @mousedown.stop
+      @contextmenu.stop.prevent
     >
       <input
-      @input="(e: InputEvent) => (text = (e.target as HTMLInputElement).value)"
-      :value="text"
+        @input="(e) => (text = (e!.target as HTMLInputElement).value)"
+        :value="text"
       />
-      <label>layer:
+      <label
+        >layer:
         <input
           type="number"
           inputmode="numeric"
           min="0"
           max="1000"
           required="true"
-          @input="(e: InputEvent) => (e.target as HTMLInputElement).value = String(z = Math.min(Math.max(parseInt((e.target as HTMLInputElement).value) || 0, 0), 1000))"
           :value="z"
-          />
+          @input="(e) => (z = onInputRange(e, 1000))"
+        />
       </label>
-      <label>size:
+      <label
+        >size:
         <input
           type="number"
           inputmode="numeric"
           min="8"
-          max="160"
-          @input="(e: InputEvent) => (e.target as HTMLInputElement).value = String(size = Math.min(Math.max(parseInt((e.target as HTMLInputElement).value) || 0, 0), 160))"
+          max="200"
           :value="size"
-          />
+          @input="(e) => (size = onInputRange(e, 200))"
+        />
       </label>
-      <label> text color:
+      <label>
+        text color:
         <input
           type="color"
-          @input="(e: InputEvent) => (color = (e?.target as HTMLInputElement).value)"
+          @input="(e) => (color = (e!.target as HTMLInputElement).value)"
           :value="color"
-          />
+        />
       </label>
-      <label>rotation:
+      <label
+        >rotation:
         <input
           type="number"
           inputmode="numeric"
-          min="0"
-          max="360"
           required="true"
-          @input="(e: InputEvent) => (e.target as HTMLInputElement).value = String(r = Math.min(Math.max(parseInt((e.target as HTMLInputElement).value) || 0, 0), 360))"
           :value="r"
-          />
+          @change="(e) => (r = onChangeRotate(e))"
+          @input="(e) => (r = onInputRotate(e, r))"
+        />
       </label>
       <button
         class="closing"
-        @click="$emit('erase', props.id)"
-        style="background-color: #903030;"
-        >del
+        @click="$emit('erase', id)"
+        style="background-color: #903030"
+      >
+        del
       </button>
     </div>
   </teleport>
@@ -71,31 +83,27 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, watch, reactive } from "vue";
+import type { DraggableItem } from "../../views/RoomEdit.vue";
+import { modulo, onChangeRotate, onInputRange, onInputRotate } from "./utils";
 
-const props = defineProps<{ id: number }>();
-
-const x = ref(100);
+const props = defineProps<{ draggable: DraggableItem; edit: boolean }>();
+const id = props.draggable.id;
+const x = ref(30);
 const z = ref(15);
-const y = ref(100);
+const y = ref(30);
 const r = ref(0);
 const size = ref(16);
 const color = ref("#FFFFFFFF");
 const text = ref("right click");
 
 onMounted(() => {
-  const saved = localStorage.getItem(`draggableText:${props.id}`);
-  if (!saved) {
-    saveSelf();
-    return;
-  }
-  const { x: sx, y: sy, z: sz, r: sr, text: stext, color: scolor, size: ssize} = JSON.parse(saved);
-  if (sx) x.value = sx;
-  if (sy) y.value = sy;
-  if (sr) r.value = sr;
-  if (sz) z.value = sz;
-  if (ssize) size.value = ssize;
-  if (stext) text.value = stext;
-  if (scolor) color.value = scolor;
+  if (props.draggable.x) x.value = props.draggable.x;
+  if (props.draggable.y) y.value = props.draggable.y;
+  if (props.draggable.r) r.value = props.draggable.r;
+  if (props.draggable.z) z.value = props.draggable.z;
+  if (props.draggable.size) size.value = props.draggable.size;
+  if (props.draggable.text) text.value = props.draggable.text;
+  if (props.draggable.color) color.value = props.draggable.color;
 });
 
 watch([x, y, z, r, text, color, size], () => saveSelf());
@@ -105,18 +113,23 @@ let offsetX = 0;
 let offsetY = 0;
 
 function saveSelf() {
-  localStorage.setItem(
-    `draggableText:${props.id}`,
-    JSON.stringify({ x: x.value, y: y.value, z: z.value, r: r.value, text: text.value, color: color.value, size: size.value})
-  );
+  emit("update", {
+    id: id,
+    type: "Text",
+    x: x.value,
+    y: y.value,
+    r: r.value,
+    text: text.value,
+    color: color.value,
+    size: size.value,
+  });
 }
 
 function startDrag(event: MouseEvent) {
-  if (event.button !== 0)
-    return;
+  if (event.button !== 0) return;
   dragging = true;
-  offsetX = event.clientX - x.value / 100 * window.innerWidth;
-  offsetY = event.clientY - y.value / 100 * window.innerHeight;
+  offsetX = event.clientX - (x.value / 100) * window.innerWidth;
+  offsetY = event.clientY - (y.value / 100) * window.innerHeight;
 
   document.addEventListener("mousemove", onDrag);
   document.addEventListener("mouseup", stopDrag);
@@ -124,8 +137,8 @@ function startDrag(event: MouseEvent) {
 
 function onDrag(event: MouseEvent) {
   if (!dragging) return;
-  x.value = (event.clientX - offsetX) * 100 / window.innerWidth;
-  y.value = (event.clientY - offsetY) * 100 / window.innerHeight;
+  x.value = ((event.clientX - offsetX) * 100) / window.innerWidth;
+  y.value = ((event.clientY - offsetY) * 100) / window.innerHeight;
 }
 
 function stopDrag() {
@@ -142,15 +155,16 @@ const menu = reactive({
 
 watch(menu, (menu) => {
   if (menu.visible) {
-    document.addEventListener('mousedown', closeMenu, {once: true})
+    document.addEventListener("mousedown", closeMenu, { once: true });
   } else {
-    document.removeEventListener('mousedown', closeMenu)
+    document.removeEventListener("mousedown", closeMenu);
   }
-})
+});
 
 const emit = defineEmits<{
-  (e: 'erase', id: number): void
-}>()
+  (e: "erase", id: number): void;
+  (e: "update", updated: DraggableItem): void;
+}>();
 
 function openMenu(e: MouseEvent) {
   menu.x = e.clientX;
@@ -159,14 +173,14 @@ function openMenu(e: MouseEvent) {
 }
 
 function closeMenu() {
-  if (size.value < 8) size.value = 8
+  r.value = modulo(r.value, 360);
+  if (size.value < 8) size.value = 8;
   menu.visible = false;
 }
 
 onBeforeUnmount(() => {
   stopDrag();
 });
-
 </script>
 
 <style scoped>
@@ -174,7 +188,6 @@ onBeforeUnmount(() => {
   position: absolute;
   width: fit-content;
   height: fit-content;
-  cursor: move;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -182,6 +195,9 @@ onBeforeUnmount(() => {
   border-radius: 6px;
   font-weight: bold;
   white-space: nowrap;
+}
+.editable {
+  cursor: move;
 }
 .closing {
   border-radius: 0%;
@@ -194,12 +210,12 @@ onBeforeUnmount(() => {
   text-decoration: none;
   display: inline-block;
   font-size: x-small;
-  margin: 4px 4px; 
+  margin: 4px 4px;
 }
 .context-menu {
   position: fixed;
   border-radius: 8px;
-  background-color: #333;  /* darker, smoother */
+  background-color: #333; /* darker, smoother */
   border: 1px solid #555;
   color: white;
   z-index: 2147483647;
@@ -223,10 +239,11 @@ onBeforeUnmount(() => {
   background-color: #444;
   color: white;
 }
-
+.context-menu input[type="number"] {
+  width: 10ch;
+}
 .context-menu button:hover {
   background-color: #666;
   cursor: pointer;
 }
-
 </style>

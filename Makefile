@@ -4,14 +4,16 @@ DOCKER_TARGET = Docker-compose.yml
 export COMPOSE_BAKE=true
 
 .PHONY: all
-all: start
+all: build start
 
 .PHONY: build
 build:
+	mkdir -p built_data/www
+	mkdir -p built_data/db
 	$(DOCKER_COMPOSE) -f $(DOCKER_TARGET) build
 
 .PHONY: start
-start: build
+start:
 	$(DOCKER_COMPOSE) -f $(DOCKER_TARGET) up -d
 
 .PHONY: restart
@@ -27,5 +29,10 @@ rm: stop
 	$(DOCKER_COMPOSE) -f $(DOCKER_TARGET) rm
 
 .PHONY: prune
-prune: stop
-	docker system prune --all --force
+prune:
+	$(DOCKER_COMPOSE) -f $(DOCKER_TARGET) down -v
+	docker system prune --all --force --volumes
+
+.PHONY: db
+db:
+	 docker exec -it postgres_db psql "postgresql://rooms_user:rooms_password@localhost:5432/rooms_db"
