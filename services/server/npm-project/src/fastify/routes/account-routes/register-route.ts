@@ -1,6 +1,7 @@
 import { FastifyInstance, FastifyReply } from "fastify";
 import prismaInstance from "../../../prisma/instance";
 import { createErrorResponse, createSuccessResponse } from "../../utils";
+import { hashPassword } from "../../../bcrypt/password";
 
 export default async function registerRoute(fastifyInstance: FastifyInstance) {
   fastifyInstance.post<{ Body: { username: string; password: string } }>(
@@ -10,7 +11,7 @@ export default async function registerRoute(fastifyInstance: FastifyInstance) {
       if (isUsernameValid(username, reply) === false) return;
       try {
         const result = await prismaInstance.$transaction(async (tx) => {
-          const user = await tx.user.create({ data: { username, password } });
+          const user = await tx.user.create({ data: { username, password: await hashPassword(password)} });
           await tx.room.create({ data: { ownerId: user.id } });
           return user;
         });

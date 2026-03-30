@@ -1,6 +1,7 @@
 import { FastifyInstance } from "fastify";
 import prismaInstance from "../../../prisma/instance";
 import { createErrorResponse, createSuccessResponse } from "../../utils";
+import { comparePassword } from "../../../bcrypt/password";
 
 export default async function logInRoute(fastifyInstance: FastifyInstance) {
   fastifyInstance.post<{ Body: { username: string; password: string } }>(
@@ -17,7 +18,7 @@ export default async function logInRoute(fastifyInstance: FastifyInstance) {
           .status(401)
           .send(createErrorResponse(`${username} doesn't exist`));
       }
-      if (user.password !== password) {
+      if (!(await comparePassword(password, user.password))) {
         return reply.status(401).send(createErrorResponse("Wrong password"));
       }
       const token = fastifyInstance.jwt.sign(
