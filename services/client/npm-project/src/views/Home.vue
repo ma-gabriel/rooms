@@ -1,8 +1,23 @@
 <template>
   <main class="page">
     <div class="fixed-search">
-      <input type="text" placeholder="Search users..." class="search-input" />
-      <Selection v-for="user in users" :key="user.name" :name="user.name" />
+      <input
+        type="text"
+        placeholder="Search users..."
+        class="search-input"
+        @input="
+          (e: InputEvent) => {
+            const elem = e.target as HTMLInputElement;
+            elem.value = (elem.value.match(/[0-9a-zA-Z_]/g) || []).join('');
+            searchUsers(elem.value);
+          }
+        "
+      />
+      <Selection
+        v-for="user in searchedUsers"
+        :key="user.name"
+        :name="user.name"
+      />
     </div>
     <section class="rooms-card">
       <header class="rooms-header">
@@ -60,6 +75,7 @@ const auth = useAuthStore();
 
 type User = { name: string };
 const users = ref<User[]>([]);
+const searchedUsers = ref<User[]>([]);
 
 const openSettingsTab = ref(false);
 function toggleSettingsTab() {
@@ -77,6 +93,23 @@ async function addUsers() {
     users.value.length = 0;
     body.data.users.forEach((username: string) => {
       users.value.push({ name: username });
+    });
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+async function searchUsers(start: string) {
+  try {
+    if (!start) {
+      searchedUsers.value.length = 0;
+      return;
+    }
+    const res = await authFetch("/api/searchrooms?start=" + start);
+    const body = await res.json();
+    searchedUsers.value.length = 0;
+    body.data.users.forEach((username: string) => {
+      searchedUsers.value.push({ name: username });
     });
   } catch (e) {
     console.error(e);

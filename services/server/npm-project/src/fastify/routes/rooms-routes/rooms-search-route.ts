@@ -2,14 +2,28 @@ import { FastifyInstance } from "fastify";
 import prismaInstance from "../../../prisma/instance";
 import { createErrorResponse, createSuccessResponse } from "../../utils";
 
-export default async function roomsGetManyRoute(
+export default async function roomsSearchRoute(
   fastifyInstance: FastifyInstance,
 ) {
-  fastifyInstance.get(
-    "/manyRooms",
+  fastifyInstance.get<{ params: { start: string } }>(
+    "/searchrooms",
     async (req, reply) => {
+      const start = req.query.start;
+      if (start === undefined)
+        return reply
+          .code(400)
+          .send(
+            createErrorResponse(
+              "need a start parameter (you're not supposed to see that)",
+            ),
+          );
       const users = await prismaInstance.room.findMany({
-        where: { privacy: "PUBLIC" },
+        where: {
+          AND: [
+            { OR: [{ privacy: "PUBLIC" }, { privacy: "RESTRICTED" }] },
+            { owner: { username: { startsWith: start } } },
+          ],
+        },
         include: {
           owner: {
             select: {
@@ -17,7 +31,7 @@ export default async function roomsGetManyRoute(
             },
           },
         },
-        take: 7,
+        take: 5,
       });
       if (users === null) {
         return reply

@@ -5,6 +5,7 @@ import roomsSetRoute from "./rooms-routes/rooms-set-route";
 import roomsGetManyRoute from "./rooms-routes/rooms-get-many-route";
 import roomsGetOtherRoute from "./rooms-routes/rooms-get-other-route";
 import roomsSetPrivacy from "./rooms-routes/set-privacy-route";
+import roomsSearchRoute from "./rooms-routes/rooms-search-route";
 
 export default async function roomsRoutes(fastifyInstance: FastifyInstance) {
   fastifyInstance.register(roomsSetRoute);
@@ -12,4 +13,5 @@ export default async function roomsRoutes(fastifyInstance: FastifyInstance) {
   fastifyInstance.register(roomsGetRoute);
   fastifyInstance.register(roomsGetOtherRoute);
   fastifyInstance.register(roomsSetPrivacy);
+  fastifyInstance.register(roomsSearchRoute);
 }
