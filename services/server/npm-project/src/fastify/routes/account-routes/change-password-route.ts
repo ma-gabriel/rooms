@@ -5,6 +5,7 @@ import {
   createSuccessResponse,
   needConnection,
 } from "../../utils";
+import { hashPassword } from "../../../bcrypt/password";
 
 export default async function changePasswordRoute(
   fastifyInstance: FastifyInstance,
@@ -17,7 +18,7 @@ export default async function changePasswordRoute(
       const { password } = req.body;
       const user = await prismaInstance.user.update({
         where: { id: req.user.id },
-        data: { password },
+        data: { password: await hashPassword(password) },
       });
       return reply.send(
         createSuccessResponse(`Hello to ${user.username}`, {

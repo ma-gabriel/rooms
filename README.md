@@ -1,7 +1,7 @@
-# a social media nobody will watch
+# a social media nobody will use
 
-It's a social media, made using vue in front, fastify, prisma, postgres and nginx in back + a few other things like imgproxy for security
+It's a social media, made using vue in front, fastify, prisma, postgres and nginx in back + a few other things like imgproxy or bcrypt for security
 
-The point of that project is to learn web, a bit of cyber, have a good portfolio and to have a website for my friends
+The point of that project is to learn web, a bit of cyber security, have a good portfolio and to have a website for my friends
 
 Also, coding alone, so do not wait for updates, accept them as they come
