@@ -2,6 +2,7 @@
   <button class="add-btn" @click="router.push({ name: 'Home' })">
     <HomeSVG />
   </button>
+  <Chat></Chat>
   <TextDraggable
     v-for="item in textItems"
     :key="item.id"
@@ -37,6 +38,7 @@ import EmbedDraggable from "../components/draggables/EmbedDraggable.vue";
 import { authFetch } from "../stores/auth";
 import { useRoute, useRouter } from "vue-router";
 import HomeSVG from "../components/svg/HomeSVG.vue";
+import Chat from "../components/Chat.vue";
 const router = useRouter();
 const route = useRoute();
 

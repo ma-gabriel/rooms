@@ -95,6 +95,8 @@ services:
       IMGPROXY_ALLOWED_CONTENT_TYPES: "image/jpeg,image/png,image/webp,image/gif,image/svg+xml"
 
       # Optional optimizations
+      environment:
+      IMGPROXY_USER_AGENT: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36"
       IMGPROXY_USE_ETAG: "true"
     networks:
       - rooms

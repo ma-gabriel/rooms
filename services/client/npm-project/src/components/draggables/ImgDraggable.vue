@@ -6,7 +6,7 @@
       top: y - size / 2 + '%',
       left: x - size / 2 + '%',
       'z-index': z,
-      width: size + '%',
+      height: size + '%',
       transform: 'rotate(' + modulo(r, 360) + 'deg)',
     }"
     @mousedown="edit && startDrag($event)"
@@ -44,14 +44,14 @@
       </label>
 
       <label
-        >width:
+        >height:
         <input
           type="number"
           inputmode="numeric"
           min="3"
-          max="110"
+          max="200"
           :value="size"
-          @input="(e) => (size = onInputRange(e, 110))"
+          @input="(e) => (size = onInputRange(e, 200))"
         />
         %
       </label>
@@ -114,6 +114,7 @@ function saveSelf() {
     x: x.value,
     y: y.value,
     r: r.value,
+    z: z.value,
     link: link.value,
     size: size.value,
   });

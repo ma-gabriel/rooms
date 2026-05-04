@@ -194,7 +194,8 @@ onBeforeUnmount(() => {
   user-select: none;
   border-radius: 6px;
   font-weight: bold;
-  white-space: nowrap;
+  white-space: pre;
+  overflow-x: auto;
 }
 .editable {
   cursor: move;
@@ -231,6 +232,40 @@ onBeforeUnmount(() => {
   margin: 2px 0;
   padding: 4px 8px;
   border-radius: 4px;
+.draggable {
+  position: absolute;
+  width: fit-content;
+  height: fit-content;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  border-radius: 6px;
+  font-weight: bold;
+  white-space: pre;
+  overflow-x: auto;
+}
+.editable {
+  cursor: move;
+}
+.closing {
+  border-radius: 0%;
+  height: fit-content;
+  align-self: center;
+  display: flex;
+  color: white;
+  padding: 2px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: x-small;
+  margin: 4px 4px;
+}
+.context-menu {
+  position: fixed;
+  border-radius: 8px;
+  background-color: #333; /* darker, smoother */
+  border: 1px solid #555;
 }
 
 .context-menu input,
